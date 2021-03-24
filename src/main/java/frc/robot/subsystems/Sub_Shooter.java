@@ -371,7 +371,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     setShuffleboard();
     turretCurrentPos = turretTalon.getSelectedSensorPosition();
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
-    String mode = RobotContainer.s_stateManager.getRobotState();
     //----------------------------------------------------------------------------------------
 
     //Sets the bool readyToFire to true or false

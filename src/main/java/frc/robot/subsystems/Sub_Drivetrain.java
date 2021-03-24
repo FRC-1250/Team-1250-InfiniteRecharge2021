@@ -342,45 +342,7 @@ public class Sub_Drivetrain extends SubsystemBase implements CAN_Input {
 
   @Override
   public void periodic(){
-    mode = RobotContainer.s_stateManager.getRobotState();
-    Joystick Gamepad = new Joystick(0);
     linearDrivingAmpControl();
-    /*
-    if (Gamepad.getRawButton(12)) {
-      driveArcade(Gamepad);
-    } else if (isPTOEngaged){
-      diffDriveGroup.arcadeDrive(-Math.abs(Gamepad.getY()), 0);
-    }
-    else{
-      drive(Gamepad);
-    }
-    */
-    //Climber Logic
-    if (RobotContainer.s_stateManager.getRobotState() == "CLIMB_MODE") {
-      RobotContainer.s_panel.extendCylinder();
-      if (Gamepad.getRawButton(Constants.BTN_X)) {
-        RobotContainer.s_climb.extendBottomCylinder();
-        RobotContainer.s_climb.extendTopCylinder();
-      }
-      else if(Gamepad.getRawButton(Constants.BTN_Y)){
-        RobotContainer.s_climb.retractBottomCylinder();
-        RobotContainer.s_climb.retractTopCylinder();
-      }
-       else if (Gamepad.getRawButton(Constants.BTN_B)) {
-        RobotContainer.s_climb.retractBottomCylinder();
-        RobotContainer.s_climb.retractTopCylinder();
-        engagePTO();
-        isPTOEngaged = true;
-      }
-    } 
-    //Logic to deploy feet for defense
-    else if (Gamepad.getRawButton(Constants.LCLICK)) {
-      defenseMode();
-    } 
-    else {
-      disengagePTO();
-    }
-    setShuffleboard();
   }
  
   public Vector<CAN_DeviceFaults> input() {

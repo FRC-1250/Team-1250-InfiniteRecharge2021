@@ -106,7 +106,6 @@ public class Sub_Hopper extends SubsystemBase implements CAN_Input {
 
   @Override
   public void periodic() {
-    String mode = RobotContainer.s_stateManager.getRobotState();
 
     setShuffleboard();
     // if (mode == "SHOOT_MODE" && Gamepad.getRawButton(Constants.LT) && (RobotContainer.s_shooter.getFlyWheelSpeed() > 1)) {
