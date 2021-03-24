@@ -63,9 +63,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   boolean goLeft = true;
   boolean goRight = true;
 
-  //Bool that determines whether robot is ready to fire
-  public boolean readyToFire;
-
   //Limelight data, used for Limelight methods
   public NetworkTable table;
   NetworkTableEntry tableTx, tableTy, tableTv;
@@ -99,8 +96,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     .withPosition(8, 1).getEntry();
   NetworkTableEntry turretSpeed = shooterTab.add("Turrent Percent", -1)
     .withPosition(8, 2).getEntry();
-  NetworkTableEntry wantedDistane = shooterTab.add("WantedDis", 0)
-    .withPosition(8, 3).getEntry();
   NetworkTableEntry turretDirection = shooterTab.add("Turret Direction", "")
     .withPosition(8, 4).withSize(2,1).getEntry();
   
@@ -160,7 +155,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     hoodTicks.setDouble(hoodNeo.getEncoder().getPosition());
     shootRPM.setDouble(flywheelFalconLeft.getSelectedSensorVelocity());
     distFromHome.setDouble(turretDistFromHome());
-    wantedDistane.setDouble(amazingQuadRegression());
     hoodTemp.setDouble(hoodNeo.getMotorTemperature());
     distFromPort.setDouble(getPortDist());
     hoodCurrent.setDouble(hoodNEOCurrentDraw());
@@ -168,6 +162,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     turretSpeed.setDouble(turretTalon.getMotorOutputPercent());
   }
 
+  // TODO: Merge logic from spinTurretMotor and hardStopConfiguration
   // Basic methods
   public void spinTurretMotor(double speed) {
     if (goLeft && speed < 0) {
@@ -238,12 +233,12 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
       double xCorrect = 0.05 * xDiff;
       spinTurretMotor(xCorrect);
     } else {
-      goHome();
+      turretGoHome();
     }
   }
 
   //Simple position control to send the turret home
-  public void goHome() {
+  public void turretGoHome() {
     if ((turretCurrentPos > turretHome) && (turretCurrentPos - turretHome > 50)) {
       // If you're to the right of the center, move left until you're within 50 ticks (turret deadband)
       spinTurretMotor(0.3);
@@ -336,26 +331,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     }
   }
 
-  
-
-  //Test method to configure rumble
-  public void rumble(double intensity) {
-    Gamepad0.setRumble(RumbleType.kLeftRumble, intensity);
-    Gamepad0.setRumble(RumbleType.kRightRumble, intensity);
-  }
-
-  //Quad equation to determin hood position 
-  //Deprecated
-  public double amazingQuadRegression(){
-    return((0.00575313 * Math.pow(getPortDist(), 2)) - (1.65056 * getPortDist()) + 39.357);
-  }
-
-  //Method to set position to ticks determined by the quad equation
-  //Deprecated
-  public void hoodGoToCorrectPos() {
-    hoodGoToPos(amazingQuadRegression());
-  }
-
   public void hoodZoneControl(int zone) {
    // zone parameter is a number 0-3 indicating which zone robot is in (0 is green, 3 is red)
     double[] zoneTicks = {0, 0, 0, 0}; // empirically tested hood tick values
@@ -365,52 +340,11 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   @Override
   public void periodic() {
     //Periodic methods that are always needed for shooter to work-----------------------------
-    hoodNEOGoHome();
     updateLimelight();
     hardStopConfiguration();
-    setShuffleboard();
     turretCurrentPos = turretTalon.getSelectedSensorPosition();
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
     //----------------------------------------------------------------------------------------
-
-    //Sets the bool readyToFire to true or false
-    //Determined by RPM and whether or not a ball is loaded
-    // if(getFlyWheelSpeed() > 19000 && RobotContainer.s_hopper.getSensor()){
-    //   readyToFire = true;
-    // }
-    // else{
-    //   readyToFire = false;
-    // }
-
-    //only works during teleop
-    if (!Robot.isItAuto){
-      // Resets the home found variable (so that button can work again)
-      if (!Gamepad1.getRawButton(6)) {
-       wasHomeFound = false;
-      }
-      //When the shoot mode button is pressed
-      // if (mode == "SHOOT_MODE") {
-      //   setFlywheelVelocityControl(20000);
-      //   //track();
-      //   hoodGoToPos(-68);
-      //   System.out.println("SHOOTER CURRENT DRAW =" + flywheelFalconLeft.getSupplyCurrent());
-      // } 
-      // //When shootmode button is not pressed
-      // else {
-      //   spinFlywheelMotors(0);
-      //   goHome();
-      //   if (wasHomeFound){
-      //   hoodGoToPos(-5);
-      //   }
-      // }
-
-      if (Gamepad0.getRawButton(Constants.BTN_Y)) {
-        spinHoodMotor(-0.3);
-      } else if (Gamepad0.getRawButton(Constants.BTN_A)) {
-        spinHoodMotor(0.3);
-      }
-
-    }
   }
 
   //Adding CAN devices for diagnostic LEDs
@@ -422,4 +356,9 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     myCanDevices.add(new CAN_DeviceFaults(flywheelFalconRight));
     return myCanDevices;
   }
+
+  public boolean isHomeFound() {
+    return wasHomeFound;
+  }
+  
 }
