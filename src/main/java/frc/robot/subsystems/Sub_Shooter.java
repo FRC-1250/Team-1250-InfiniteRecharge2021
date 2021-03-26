@@ -19,9 +19,6 @@ import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import frc.robot.Robot;
-
-
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -31,7 +28,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
 import frc.robot.utilities.CAN_DeviceFaults;
 import frc.robot.utilities.CAN_Input;
 
@@ -42,10 +38,12 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   WPI_TalonFX flywheelFalconLeft = new WPI_TalonFX(Constants.SHOOT_FALCON_0);
   WPI_TalonFX flywheelFalconRight = new WPI_TalonFX(Constants.SHOOT_FALCON_1);
 
+  //Hood Neo control
+  boolean wasHomeFound = false; //Starts robot in a "no home found" state
   public CANPIDController hoodPID = new CANPIDController(hoodNeo);
-  PIDController turretPIDController = new PIDController(Constants.SHOOT_TURRET_P, 0, Constants.SHOOT_TURRET_D);
 
   //Bools for hardstop config
+  PIDController turretPIDController = new PIDController(Constants.SHOOT_TURRET_P, 0, Constants.SHOOT_TURRET_D);
   boolean goLeft = true;
   boolean goRight = true;
 
@@ -85,14 +83,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   NetworkTableEntry turretDirection = shooterTab.add("Turret Direction", "")
     .withPosition(8, 4).withSize(2,1).getEntry();
   
-  public ShuffleboardTab getTab() {
-    return shooterTab;
-  }
-
-  //Hood Neo control
-  boolean wasHomeFound = false; //Starts robot in a "no home found" state
-  double interpolatedHoodPosition; //Deprecated for now
-
   public Sub_Shooter() {
    //Sets the right falcon to follow the opposite of that the left falcon is doing
    //Right = follower Left = leader
@@ -121,6 +111,8 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
 
    //Ramp rate to make sure hood neo finds home cleanly
    hoodNeo.setOpenLoopRampRate(0.4);
+
+   NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
   }
   
   //Shuffleboard value update method
@@ -134,6 +126,10 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     hoodCurrent.setDouble(hoodNEOCurrentDraw());
     homeFound.setString(Boolean.toString(wasHomeFound));
     turretSpeed.setDouble(turretTalon.getMotorOutputPercent());
+  }
+
+  public ShuffleboardTab getTab() {
+    return shooterTab;
   }
 
    // Turret
@@ -330,11 +326,11 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   public void periodic() {
     //Periodic methods that are always needed for shooter to work-----------------------------
     updateLimelight();
-    NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
     //----------------------------------------------------------------------------------------
   }
 
   //Adding CAN devices for diagnostic LEDs
+  @Deprecated
   public Vector<CAN_DeviceFaults> input() {
     Vector<CAN_DeviceFaults> myCanDevices = new Vector<CAN_DeviceFaults>();
     myCanDevices.add(new CAN_DeviceFaults(turretTalon));
