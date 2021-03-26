@@ -249,11 +249,12 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
 
   //Simple position control to send the turret home
   public void turretGoHome() {
-    if ((turretCurrentPos > Constants.SHOOT_TURRET_HOME) && (turretCurrentPos - Constants.SHOOT_TURRET_HOME > 50)) {
+    double turretCurrentPosition = turretTalon.getSelectedSensorPosition();
+    if ((turretCurrentPosition > Constants.SHOOT_TURRET_HOME) && (turretCurrentPosition - Constants.SHOOT_TURRET_HOME > 50)) {
       // If you're to the right of the center, move left until you're within 50 ticks (turret deadband)
       rotateTurret(0.3);
       turretDirection.setString("Going left");
-    } else if ((turretCurrentPos < Constants.SHOOT_TURRET_HOME) && (turretCurrentPos - Constants.SHOOT_TURRET_HOME < -50)) {
+    } else if ((turretCurrentPosition < Constants.SHOOT_TURRET_HOME) && (turretCurrentPosition - Constants.SHOOT_TURRET_HOME < -50)) {
       // If you're to the left of the center, move right until you're within 50 ticks
       rotateTurret(-0.3);
       turretDirection.setString("Going right");
@@ -278,7 +279,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   
   //Returns how far the turret is from it's home position
   public double turretDistFromHome() {
-    return Math.abs(turretCurrentPos - Constants.SHOOT_TURRET_HOME);
+    return Math.abs(turretTalon.getSelectedSensorPosition() - Constants.SHOOT_TURRET_HOME);
   }
 
   //Converts ty of limelight to return distance to the outer port in inches
@@ -331,7 +332,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   public void periodic() {
     //Periodic methods that are always needed for shooter to work-----------------------------
     updateLimelight();
-    turretCurrentPos = turretTalon.getSelectedSensorPosition();
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
     //----------------------------------------------------------------------------------------
   }
