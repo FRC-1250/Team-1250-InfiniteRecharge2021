@@ -162,8 +162,23 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     turretSpeed.setDouble(turretTalon.getMotorOutputPercent());
   }
 
-  // TODO: Merge logic from spinTurretMotor and hardStopConfiguration
-  // Basic methods
+   // Turret
+   public void rotateTurret(double speed) {
+    Boolean rightBoundBreached = turretTalon.getSelectedSensorPosition() > Constants.SHOOT_TURRET_RIGHT_BOUND;
+    Boolean leftBoundBreached = turretTalon.getSelectedSensorPosition() < Constants.SHOOT_TURRET_LEFT_BOUND;
+
+    if (!rightBoundBreached && !leftBoundBreached) {
+      turretTalon.set(speed);
+    } else if (leftBoundBreached && speed < 0) {
+      turretTalon.set(speed);
+    } else if (rightBoundBreached && speed > 0) {
+      turretTalon.set(speed);
+    } else {
+      turretTalon.set(0);
+    }
+  }
+
+  @Deprecated
   public void spinTurretMotor(double speed) {
     if (goLeft && speed < 0) {
       turretTalon.set(speed);
@@ -171,6 +186,25 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
       turretTalon.set(speed);
     } else {
       turretTalon.set(0);
+    }
+  }
+
+   //Determines based on boundries whether or not the turret is allowed to turn to the left or right
+   @Deprecated
+   public void hardStopConfiguration() {
+    if (turretTalon.getSelectedSensorPosition() > turretRightStop) {
+      // turretTalon.configPeakOutputReverse(0, 10);
+      goRight = false;
+    } else {
+      // turretTalon.configPeakOutputReverse(-1, 10);
+      goRight = true;
+    }
+    if (turretTalon.getSelectedSensorPosition() < turretLeftStop) {
+      // turretTalon.configPeakOutputForward(0, 10);
+      goLeft = false;
+    } else {
+      // turretTalon.configPeakOutputForward(1, 10);
+      goLeft = true;
     }
   }
 
@@ -231,7 +265,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
       
       double xDiff = 0 - steering_adjust;
       double xCorrect = 0.05 * xDiff;
-      spinTurretMotor(xCorrect);
+      rotateTurret(xCorrect);
     } else {
       turretGoHome();
     }
@@ -241,14 +275,14 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   public void turretGoHome() {
     if ((turretCurrentPos > turretHome) && (turretCurrentPos - turretHome > 50)) {
       // If you're to the right of the center, move left until you're within 50 ticks (turret deadband)
-      spinTurretMotor(0.3);
+      rotateTurret(0.3);
       turretDirection.setString("Going left");
     } else if ((turretCurrentPos < turretHome) && (turretCurrentPos - turretHome < -50)) {
       // If you're to the left of the center, move right until you're within 50 ticks
-      spinTurretMotor(-0.3);
+      rotateTurret(-0.3);
       turretDirection.setString("Going right");
     } else {
-      spinTurretMotor(0);
+      rotateTurret(0);
       turretDirection.setString("At home");
     }
   }
@@ -297,24 +331,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     hoodNeo.getEncoder().setPosition(0);
   }
 
-  //Determines based on boundries whether or not the turret is allowed to turn to the left or right
-  public void hardStopConfiguration() {
-    if (turretTalon.getSelectedSensorPosition() > turretRightStop) {
-      // turretTalon.configPeakOutputReverse(0, 10);
-      goRight = false;
-    } else {
-      // turretTalon.configPeakOutputReverse(-1, 10);
-      goRight = true;
-    }
-    if (turretTalon.getSelectedSensorPosition() < turretLeftStop) {
-      // turretTalon.configPeakOutputForward(0, 10);
-      goLeft = false;
-    } else {
-      // turretTalon.configPeakOutputForward(1, 10);
-      goLeft = true;
-    }
-  }
-
   //Finds home of the hood by colliding the hood with the end of the track
   //Looks at amount of amps drawn. When amps spike, home is assumed to be at that position
   public void hoodNEOGoHome() {
@@ -341,7 +357,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   public void periodic() {
     //Periodic methods that are always needed for shooter to work-----------------------------
     updateLimelight();
-    hardStopConfiguration();
     turretCurrentPos = turretTalon.getSelectedSensorPosition();
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
     //----------------------------------------------------------------------------------------

@@ -52,7 +52,8 @@ public class Cmd_Shoot extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    s_shooter.spinTurretMotor(0);
+    //Explicitly stop the turret motor on end and interrupt
+    s_shooter.rotateTurret(0);
   }
 
   @Override
