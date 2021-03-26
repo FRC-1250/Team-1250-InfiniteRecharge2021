@@ -43,14 +43,9 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   WPI_TalonFX flywheelFalconRight = new WPI_TalonFX(Constants.SHOOT_FALCON_1);
 
   public CANPIDController hoodPID = new CANPIDController(hoodNeo);
-  double turretP = Constants.SHOOT_TURRET_P;
-  double turretD = Constants.SHOOT_TURRET_D;
-  PIDController turretPIDController = new PIDController(turretP, 0, turretD);
+  PIDController turretPIDController = new PIDController(Constants.SHOOT_TURRET_P, 0, Constants.SHOOT_TURRET_D);
 
   public double turretCurrentPos;
-  public double turretHome = Constants.SHOOT_TURRET_HOME;
-  public double turretLeftStop = Constants.SHOOT_TURRET_LEFT_BOUND;
-  public double turretRightStop = Constants.SHOOT_TURRET_RIGHT_BOUND;
 
   //Bools for hardstop config
   boolean goLeft = true;
@@ -65,7 +60,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
   NetworkTableEntry turPos = shooterTab.add("Turret Position (ticks)", 0)
     .withWidget(BuiltInWidgets.kNumberBar)
-    .withProperties(Map.of("min", turretLeftStop, "max", turretRightStop))
+    .withProperties(Map.of("min", Constants.SHOOT_TURRET_LEFT_BOUND, "max", Constants.SHOOT_TURRET_RIGHT_BOUND))
     .withSize(2, 1)
     .withPosition(0, 0).getEntry();
   NetworkTableEntry distFromHome = shooterTab.add("Turret Distance from Home (ticks)", 0)
@@ -98,19 +93,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
 
   //Hood Neo control
   boolean wasHomeFound = false; //Starts robot in a "no home found" state
-  int hoodCollisionAmps = 22; //x amps to determine when a collision or home is hit
   double interpolatedHoodPosition; //Deprecated for now
-
-  //Hood neo PID values
-  double hoodP = Constants.SHOOT_HOOD_P;
-  double hoodI = Constants.SHOOT_HOOD_I;
-  double hoodD = Constants.SHOOT_HOOD_D;
-
-  //Flywheel PIDF values
-  double flywheelP = Constants.SHOOT_FLYWHEEL_P;
-  double flywheelI = Constants.SHOOT_FLYWHEEL_I;
-  double flywheelD = Constants.SHOOT_FLYWHEEL_D;
-  double flywheelF = Constants.SHOOT_FLYWHEEL_F;
 
   public Sub_Shooter() {
    //Sets the right falcon to follow the opposite of that the left falcon is doing
@@ -123,16 +106,16 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
    flywheelFalconRight.configPeakOutputReverse(0);
 
    //Configures PID for hood position control
-   hoodPID.setP(hoodP);
-   hoodPID.setI(hoodI);
-   hoodPID.setD(hoodD);
+   hoodPID.setP(Constants.SHOOT_HOOD_P);
+   hoodPID.setI(Constants.SHOOT_HOOD_I);
+   hoodPID.setD(Constants.SHOOT_HOOD_D);
 
    //Configures PIDF for flywheel velocity control
    //F VALUE WILL WORK FOR ALL FALCON 500s
-   flywheelFalconLeft.config_kP(0, flywheelP);
-   flywheelFalconLeft.config_kI(0, flywheelI);
-   flywheelFalconLeft.config_kD(0, flywheelD);
-   flywheelFalconLeft.config_kF(0, flywheelF);
+   flywheelFalconLeft.config_kP(0, Constants.SHOOT_FLYWHEEL_P);
+   flywheelFalconLeft.config_kI(0, Constants.SHOOT_FLYWHEEL_I);
+   flywheelFalconLeft.config_kD(0, Constants.SHOOT_FLYWHEEL_D);
+   flywheelFalconLeft.config_kF(0, Constants.SHOOT_FLYWHEEL_F);
 
    //Configures the turret encoder to absolute (Armabot Turret 240)
    turretTalon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
@@ -185,14 +168,14 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
    //Determines based on boundries whether or not the turret is allowed to turn to the left or right
    @Deprecated
    public void hardStopConfiguration() {
-    if (turretTalon.getSelectedSensorPosition() > turretRightStop) {
+    if (turretTalon.getSelectedSensorPosition() > Constants.SHOOT_TURRET_RIGHT_BOUND) {
       // turretTalon.configPeakOutputReverse(0, 10);
       goRight = false;
     } else {
       // turretTalon.configPeakOutputReverse(-1, 10);
       goRight = true;
     }
-    if (turretTalon.getSelectedSensorPosition() < turretLeftStop) {
+    if (turretTalon.getSelectedSensorPosition() < Constants.SHOOT_TURRET_LEFT_BOUND) {
       // turretTalon.configPeakOutputForward(0, 10);
       goLeft = false;
     } else {
@@ -266,11 +249,11 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
 
   //Simple position control to send the turret home
   public void turretGoHome() {
-    if ((turretCurrentPos > turretHome) && (turretCurrentPos - turretHome > 50)) {
+    if ((turretCurrentPos > Constants.SHOOT_TURRET_HOME) && (turretCurrentPos - Constants.SHOOT_TURRET_HOME > 50)) {
       // If you're to the right of the center, move left until you're within 50 ticks (turret deadband)
       rotateTurret(0.3);
       turretDirection.setString("Going left");
-    } else if ((turretCurrentPos < turretHome) && (turretCurrentPos - turretHome < -50)) {
+    } else if ((turretCurrentPos < Constants.SHOOT_TURRET_HOME) && (turretCurrentPos - Constants.SHOOT_TURRET_HOME < -50)) {
       // If you're to the left of the center, move right until you're within 50 ticks
       rotateTurret(-0.3);
       turretDirection.setString("Going right");
@@ -295,7 +278,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   
   //Returns how far the turret is from it's home position
   public double turretDistFromHome() {
-    return Math.abs(turretCurrentPos - turretHome);
+    return Math.abs(turretCurrentPos - Constants.SHOOT_TURRET_HOME);
   }
 
   //Converts ty of limelight to return distance to the outer port in inches
@@ -328,9 +311,9 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   //Looks at amount of amps drawn. When amps spike, home is assumed to be at that position
   public void hoodNEOGoHome() {
     if(!wasHomeFound) {
-      if (hoodNEOCurrentDraw() < hoodCollisionAmps) {
+      if (hoodNEOCurrentDraw() < Constants.HOOD_HOME_COLLISION_AMPS) {
         hoodNEOPercentControl(0.35);
-      } else if (hoodNEOCurrentDraw() >= hoodCollisionAmps) {
+      } else if (hoodNEOCurrentDraw() >= Constants.HOOD_HOME_COLLISION_AMPS) {
         hoodNEOPercentControl(0);
         hoodNEOResetPos();
         wasHomeFound = true;
