@@ -25,8 +25,6 @@ import frc.robot.Robot;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
@@ -45,11 +43,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   WPI_TalonFX flywheelFalconRight = new WPI_TalonFX(Constants.SHOOT_FALCON_1);
 
   public CANPIDController hoodPID = new CANPIDController(hoodNeo);
-
-  Joystick Gamepad0 = new Joystick(0); // LOGITECH CONTROLLER
-  Joystick Gamepad1 = new Joystick(1); // BUTTON BOARD
-  Joystick Gamepad2 = new Joystick(2); // DEV
-  
   double turretP = Constants.SHOOT_TURRET_P;
   double turretD = Constants.SHOOT_TURRET_D;
   PIDController turretPIDController = new PIDController(turretP, 0, turretD);
@@ -342,8 +335,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
         hoodNEOResetPos();
         wasHomeFound = true;
       }
-    } else if (wasHomeFound) {
-      hoodNeo.set(Gamepad1.getX() * 0.2);
     }
   }
 
