@@ -45,8 +45,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   public CANPIDController hoodPID = new CANPIDController(hoodNeo);
   PIDController turretPIDController = new PIDController(Constants.SHOOT_TURRET_P, 0, Constants.SHOOT_TURRET_D);
 
-  public double turretCurrentPos;
-
   //Bools for hardstop config
   boolean goLeft = true;
   boolean goRight = true;
