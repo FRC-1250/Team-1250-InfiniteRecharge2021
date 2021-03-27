@@ -13,6 +13,10 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.auto_actions.Cmd_PlayAutoRecord;
 import frc.robot.commands.auto_actions.Cmd_StartAutoRecord;
 import frc.robot.commands.hopper.Cmd_HopperManagement;
+import frc.robot.commands.intake.CmdI_IntakeStart;
+import frc.robot.commands.intake.CmdI_IntakeStop;
+import frc.robot.commands.shared.Cmd_Shoot;
+import frc.robot.commands.shooter.Cmd_ShooterIdle;
 import frc.robot.subsystems.Sub_Climber;
 import frc.robot.subsystems.Sub_Drivetrain;
 import frc.robot.subsystems.Sub_Hopper;
@@ -21,6 +25,7 @@ import frc.robot.subsystems.Sub_Recorder;
 import frc.robot.subsystems.Sub_Shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -39,27 +44,65 @@ public class RobotContainer {
   public static final Sub_Hopper s_hopper = new Sub_Hopper();
   public static final Sub_Recorder s_recorder = new Sub_Recorder();
 
-  // Buttons
-  public static Joystick Gamepad = new Joystick(0);
-  private static Joystick Gamepad1 = new Joystick(1);
-  private static JoystickButton x = new JoystickButton(Gamepad, 1);
-  private static JoystickButton a = new JoystickButton(Gamepad, 2);
-  private static JoystickButton b = new JoystickButton(Gamepad, 3);
-  private static JoystickButton y = new JoystickButton(Gamepad, 4);
-  private static JoystickButton back = new JoystickButton(Gamepad, 9);
-  private static JoystickButton start = new JoystickButton(Gamepad, 10);
-  private static JoystickButton unjam = new JoystickButton(Gamepad1, 3);
-  public static JoystickButton panelMode = new JoystickButton(Gamepad1, Constants.PANEL_MODE);
-  public static JoystickButton shootMode = new JoystickButton(Gamepad1, Constants.SHOOT_MODE);
-  public static JoystickButton climbMode = new JoystickButton(Gamepad1, Constants.CLIMB_MODE);
-  public static JoystickButton unjamMode = new JoystickButton(Gamepad1, Constants.UNJAM_MODE);
+   // Driver joystick and buttons for logitech gamepad.
+   Joystick driver = new Joystick(0);
+   JoystickButton driverXButton = new JoystickButton(driver, Constants.X_BUTTON);
+   JoystickButton driverYButton = new JoystickButton(driver, Constants.Y_BUTTON);
+   JoystickButton driverAButton = new JoystickButton(driver, Constants.A_BUTTON);
+   JoystickButton driverBButton = new JoystickButton(driver, Constants.B_BUTTON);
+   JoystickButton driverBackButton = new JoystickButton(driver, Constants.BACK_BUTTON);
+   JoystickButton driverStartButton = new JoystickButton(driver, Constants.START_BUTTON);
+   JoystickButton driverLeftBumper = new JoystickButton(driver, Constants.LEFT_BUMPER);
+   JoystickButton driverRightBumper = new JoystickButton(driver, Constants.RIGHT_BUMPER);
+   JoystickButton driverLeftTrigger = new JoystickButton(driver, Constants.LEFT_TRIGEER);
+   JoystickButton driverRightTrigger = new JoystickButton(driver, Constants.RIGHT_TRIGGER);
+   JoystickButton driverLeftStickClick = new JoystickButton(driver, Constants.LEFT_STICK_CLICK);
+   JoystickButton driverRightStickClick = new JoystickButton(driver, Constants.RIGHT_STICK_CLICK);
+ 
+   // Operator joystick and buttons
+   Joystick operator = new Joystick(1);
+   JoystickButton operatorClimbButton = new JoystickButton(operator, Constants.CLIMB_MODE);
+   JoystickButton operatorShootButton = new JoystickButton(operator, Constants.SHOOT_MODE);
+   JoystickButton operatorPanelButton = new JoystickButton(operator, Constants.PANEL_MODE);
+   JoystickButton operatorUnjamButton = new JoystickButton(operator, Constants.UNJAM_MODE);
+
+  // Co-op triggers
+  // Driver action button -> Right bumper
+  Trigger shootModeAndDriverActionButton = new Trigger() {
+    @Override
+    public boolean get() {
+      return operatorShootModeActive() && driverRightBumper.get();
+    }
+  };
+
+  Trigger climbModeAndDriverActionButton = new Trigger() {
+    @Override
+    public boolean get() {
+      return operatorClimbModeActive() && driverRightBumper.get();
+    }
+  };
+
+  Trigger unjamModeAndDriverActionButton = new Trigger() {
+    @Override
+    public boolean get() {
+      return operatorUnjamModeActive() && driverRightBumper.get();
+    }
+  };
+
+  Trigger panelModeAndDriverActionButton = new Trigger() {
+    @Override
+    public boolean get() {
+      return operatorPanelModeActive() && driverRightBumper.get();
+    }
+  };
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   public RobotContainer() {
-    configureButtonBindings();
+    configureButtonBindings(false);
     s_hopper.setDefaultCommand(new Cmd_HopperManagement(s_hopper));
+    s_shooter.setDefaultCommand(new Cmd_ShooterIdle(s_shooter, false, false));
 
     ShuffleboardTab recorderTab = Shuffleboard.getTab("Recorder");
     s_recorder.addFileChooserOptions();
@@ -67,21 +110,76 @@ public class RobotContainer {
     recorderTab.add("Playback record", new Cmd_PlayAutoRecord(s_recorder, s_drivetrain)).withPosition(2, 1).withSize(2, 1);
   }
 
-  private void configureButtonBindings() {
-    /*
-    * Buttons
-    * Intake on
-    * Intake off
-    * Shoot (Flywheels + Hopper)
-    * Record drive on
-    * Record off
-    * 
-    */
+   /**
+   * Use this method to define your button->command mappings.
+   * 
+   * @param coopMode true = co-op mode, false = single mode
+   * 
+   * @see https://docs.wpilib.org/en/stable/docs/software/commandbased/binding-commands-to-triggers.html#trigger-button-bindings
+   */
+  private void configureButtonBindings(Boolean coopMode) {
+    if (coopMode) {
+      // Add co-op buttons here
+    } else {
+      driverRightBumper.whileActiveOnce(new Cmd_Shoot(s_hopper, s_shooter));
+      driverXButton.toggleWhenActive(new Cmd_StartAutoRecord(s_recorder, s_drivetrain));
+      driverYButton.whenActive(new Cmd_PlayAutoRecord(s_recorder, s_drivetrain));
+      driverLeftBumper.whenActive(new CmdI_IntakeStart(s_intake));
+      driverLeftTrigger.whenActive(new CmdI_IntakeStop(s_intake));
+    }
+  }
 
-    /* Commands
-     * Hopper idle
-     * Shooter idle
-     */
+  /*
+   * This will not work for normal buttons!
+   * Operator buttons default to true -> Active
+   */
+
+  private boolean operatorShootModeActive() {
+    if (operatorShootButton.get()) {
+      return false;
+    } else {
+      if (operatorClimbButton.get() && operatorUnjamButton.get() && operatorPanelButton.get()) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  private boolean operatorClimbModeActive() {
+    if (operatorClimbButton.get()) {
+      return false;
+    } else {
+      if (operatorUnjamButton.get() && operatorPanelButton.get() && operatorShootButton.get()) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  private boolean operatorUnjamModeActive() {
+    if (operatorUnjamButton.get()) {
+      return false;
+    } else {
+      if (operatorClimbButton.get() && operatorPanelButton.get() && operatorShootButton.get()) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  private boolean operatorPanelModeActive() {
+    if (operatorPanelButton.get()) {
+      return false;
+    } else {
+      if (operatorClimbButton.get() && operatorUnjamButton.get() && operatorShootButton.get()) {
+        return true;
+      } else {
+        return false;
+      }
+    }
   }
 
   public Command getAutonomousCommand() {
