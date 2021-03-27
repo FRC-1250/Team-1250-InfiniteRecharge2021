@@ -66,6 +66,36 @@ public class RobotContainer {
    JoystickButton operatorPanelButton = new JoystickButton(operator, Constants.PANEL_MODE);
    JoystickButton operatorUnjamButton = new JoystickButton(operator, Constants.UNJAM_MODE);
 
+  // Co-op triggers
+  // Driver action button -> Right bumper
+  Trigger shootModeAndDriverActionButton = new Trigger() {
+    @Override
+    public boolean get() {
+      return operatorShootModeActive() && driverRightBumper.get();
+    }
+  };
+
+  Trigger climbModeAndDriverActionButton = new Trigger() {
+    @Override
+    public boolean get() {
+      return operatorClimbModeActive() && driverRightBumper.get();
+    }
+  };
+
+  Trigger unjamModeAndDriverActionButton = new Trigger() {
+    @Override
+    public boolean get() {
+      return operatorUnjamModeActive() && driverRightBumper.get();
+    }
+  };
+
+  Trigger panelModeAndDriverActionButton = new Trigger() {
+    @Override
+    public boolean get() {
+      return operatorPanelModeActive() && driverRightBumper.get();
+    }
+  };
+
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
@@ -96,6 +126,59 @@ public class RobotContainer {
       driverYButton.whenActive(new Cmd_PlayAutoRecord(s_recorder, s_drivetrain));
       driverLeftBumper.whenActive(new CmdI_IntakeStart(s_intake));
       driverLeftTrigger.whenActive(new CmdI_IntakeStop(s_intake));
+    }
+  }
+
+  /*
+   * This will not work for normal buttons!
+   * Operator buttons default to true -> Active
+   */
+
+  private boolean operatorShootModeActive() {
+    if (operatorShootButton.get()) {
+      return false;
+    } else {
+      if (operatorClimbButton.get() && operatorUnjamButton.get() && operatorPanelButton.get()) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  private boolean operatorClimbModeActive() {
+    if (operatorClimbButton.get()) {
+      return false;
+    } else {
+      if (operatorUnjamButton.get() && operatorPanelButton.get() && operatorShootButton.get()) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  private boolean operatorUnjamModeActive() {
+    if (operatorUnjamButton.get()) {
+      return false;
+    } else {
+      if (operatorClimbButton.get() && operatorPanelButton.get() && operatorShootButton.get()) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  }
+
+  private boolean operatorPanelModeActive() {
+    if (operatorPanelButton.get()) {
+      return false;
+    } else {
+      if (operatorClimbButton.get() && operatorUnjamButton.get() && operatorShootButton.get()) {
+        return true;
+      } else {
+        return false;
+      }
     }
   }
 
