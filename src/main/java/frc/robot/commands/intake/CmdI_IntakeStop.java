@@ -7,36 +7,22 @@
 
 package frc.robot.commands.intake;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.Sub_Intake;
 
-public class Cmd_Collect extends CommandBase {
-  /**
-   * Creates a new Cmd_Collect.
-   */
+public class CmdI_IntakeStop extends InstantCommand {
+
   private final Sub_Intake s_intake;
-  public Cmd_Collect(Sub_Intake intake) {
+
+  public CmdI_IntakeStop(Sub_Intake intake) {
     s_intake = intake;
     addRequirements(intake);
   }
 
   @Override
   public void initialize() {
- 
+    s_intake.spinIntakeMotor(0);
+    s_intake.retractCylinder();
   }
 
-  @Override
-  public void execute() {
-    s_intake.spinIntakeMotor(1);
-    s_intake.extendCylinder();
-  }
-
-  @Override
-  public void end(boolean interrupted) {
-  }
-
-  @Override
-  public boolean isFinished() {
-    return false;
-  }
 }
