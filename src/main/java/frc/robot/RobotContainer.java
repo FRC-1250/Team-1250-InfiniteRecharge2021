@@ -25,6 +25,7 @@ import frc.robot.subsystems.Sub_Recorder;
 import frc.robot.subsystems.Sub_Shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -79,16 +80,23 @@ public class RobotContainer {
     recorderTab.add("Playback record", new Cmd_PlayAutoRecord(s_recorder, s_drivetrain)).withPosition(2, 1).withSize(2, 1);
   }
 
+   /**
+   * Use this method to define your button->command mappings.
+   * 
+   * @param coopMode true = co-op mode, false = single mode
+   * 
+   * @see https://docs.wpilib.org/en/stable/docs/software/commandbased/binding-commands-to-triggers.html#trigger-button-bindings
+   */
   private void configureButtonBindings(Boolean coopMode) {
     if (coopMode) {
+      // Add co-op buttons here
     } else {
       driverRightBumper.whileActiveOnce(new Cmd_Shoot(s_hopper, s_shooter));
+      driverXButton.toggleWhenActive(new Cmd_StartAutoRecord(s_recorder, s_drivetrain));
+      driverYButton.whenActive(new Cmd_PlayAutoRecord(s_recorder, s_drivetrain));
+      driverLeftBumper.whenActive(new CmdI_IntakeStart(s_intake));
+      driverLeftTrigger.whenActive(new CmdI_IntakeStop(s_intake));
     }
-
-    driverXButton.toggleWhenActive(new Cmd_StartAutoRecord(s_recorder, s_drivetrain));
-    driverYButton.whenActive(new Cmd_PlayAutoRecord(s_recorder, s_drivetrain));
-    driverLeftBumper.whenActive(new CmdI_IntakeStart(s_intake));
-    driverLeftTrigger.whenActive(new CmdI_IntakeStop(s_intake));
   }
 
   public Command getAutonomousCommand() {
