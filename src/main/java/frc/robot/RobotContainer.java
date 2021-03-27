@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.auto_actions.Cmd_PlayAutoRecord;
 import frc.robot.commands.auto_actions.Cmd_StartAutoRecord;
 import frc.robot.commands.hopper.Cmd_HopperManagement;
+import frc.robot.commands.shooter.Cmd_ShooterIdle;
 import frc.robot.subsystems.Sub_Climber;
 import frc.robot.subsystems.Sub_Drivetrain;
 import frc.robot.subsystems.Sub_Hopper;
@@ -60,6 +61,7 @@ public class RobotContainer {
   public RobotContainer() {
     configureButtonBindings();
     s_hopper.setDefaultCommand(new Cmd_HopperManagement(s_hopper));
+    s_shooter.setDefaultCommand(new Cmd_ShooterIdle(s_shooter, false, false));
 
     ShuffleboardTab recorderTab = Shuffleboard.getTab("Recorder");
     s_recorder.addFileChooserOptions();
