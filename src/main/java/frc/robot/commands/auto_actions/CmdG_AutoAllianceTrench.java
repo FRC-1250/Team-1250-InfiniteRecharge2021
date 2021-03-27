@@ -10,8 +10,8 @@ package frc.robot.commands.auto_actions;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.drive.Cmd_AutoDrive;
 import frc.robot.commands.drive.Cmd_AutoTurn;
-import frc.robot.commands.intake.Cmd_Collect;
-import frc.robot.commands.intake.Cmd_StopCollect;
+import frc.robot.commands.intake.CmdI_Collect;
+import frc.robot.commands.intake.CmdI_StopCollect;
 import frc.robot.commands.shooter.Cmd_HoodGoToPos;
 import frc.robot.commands.shooter.Cmd_ShootNTimes;
 import frc.robot.subsystems.Sub_Drivetrain;
@@ -48,12 +48,12 @@ public class CmdG_AutoAllianceTrench extends SequentialCommandGroup {
     // new Cmd_ShootNTimes(s_shooter, s_hopper, 5)
 
     new Cmd_ShootNTimes(s_shooter, s_hopper, 3),
-    new Cmd_Collect(s_intake),
+    new CmdI_Collect(s_intake),
     new Cmd_AutoDrive(s_drive, 140, 0.7, 0.7),
     new Cmd_DoNothing().withTimeout(0.2),
-    new Cmd_StopCollect(s_intake, s_hopper),
+    new CmdI_StopCollect(s_intake),
     new Cmd_AutoDrive(s_drive, -100, 0.7, 0.7),
-    new Cmd_ShootNTimes(s_shooter, s_hopper, 5).alongWith(new Cmd_Collect(s_intake))
+    new Cmd_ShootNTimes(s_shooter, s_hopper, 5).alongWith(new CmdI_Collect(s_intake))
     );
 
   }

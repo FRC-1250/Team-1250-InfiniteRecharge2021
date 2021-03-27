@@ -22,7 +22,7 @@ public class CmdI_Collect extends InstantCommand {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    s_intake.spinIntakeMotor(0.8);
+    s_intake.spinIntakeMotor(1);
     s_intake.extendCylinder();
   }
 }

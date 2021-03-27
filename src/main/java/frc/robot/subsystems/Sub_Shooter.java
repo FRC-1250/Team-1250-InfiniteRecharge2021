@@ -19,21 +19,19 @@ import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.ControlType;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import frc.robot.Robot;
-
 
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.Joystick;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.RobotContainer;
 import frc.robot.utilities.CAN_DeviceFaults;
 import frc.robot.utilities.CAN_Input;
 
@@ -68,41 +66,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   NetworkTableEntry tableTx, tableTy, tableTv;
   double tx, ty, tv;
 
-  // Shuffleboard position and data config
-  ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
-  NetworkTableEntry turPos = shooterTab.add("Turret Position (ticks)", 0)
-    .withWidget(BuiltInWidgets.kNumberBar)
-    .withProperties(Map.of("min", turretLeftStop, "max", turretRightStop))
-    .withSize(2, 1)
-    .withPosition(0, 0).getEntry();
-  NetworkTableEntry distFromHome = shooterTab.add("Turret Distance from Home (ticks)", 0)
-    .withSize(2, 1)
-    .withPosition(2, 0).getEntry();
-  NetworkTableEntry hoodTemp = shooterTab.add("Hood Temp", 0)
-    .withPosition(4, 0).getEntry();
-  NetworkTableEntry hoodTicks = shooterTab.add("Hood Ticks", 0)
-    .withPosition(4, 2).getEntry();
-  NetworkTableEntry hoodCurrent = shooterTab.add("Hood Current", 0)
-    .withPosition(4, 1).getEntry();
-  NetworkTableEntry shootRPM = shooterTab.add("Shooter RPM", 0)
-    .withWidget(BuiltInWidgets.kGraph)
-    .withPosition(5, 0).getEntry();
-  NetworkTableEntry distFromPort = shooterTab.add("Distance from Outer Port", 0)
-    .withWidget(BuiltInWidgets.kNumberBar)
-    .withProperties(Map.of("min", 12, "max", 629))
-    .withSize(3, 1)
-    .withPosition(5, 2).getEntry();
-  NetworkTableEntry homeFound = shooterTab.add("Home Found", "false")
-    .withPosition(8, 1).getEntry();
-  NetworkTableEntry turretSpeed = shooterTab.add("Turrent Percent", -1)
-    .withPosition(8, 2).getEntry();
-  NetworkTableEntry turretDirection = shooterTab.add("Turret Direction", "")
-    .withPosition(8, 4).withSize(2,1).getEntry();
-  
-  public ShuffleboardTab getTab() {
-    return shooterTab;
-  }
-
   //Hood Neo control
   boolean wasHomeFound = false; //Starts robot in a "no home found" state
   int hoodCollisionAmps = 22; //x amps to determine when a collision or home is hit
@@ -118,6 +81,32 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   double flywheelI = Constants.SHOOT_FLYWHEEL_I;
   double flywheelD = Constants.SHOOT_FLYWHEEL_D;
   double flywheelF = Constants.SHOOT_FLYWHEEL_F;
+
+  // Shuffleboard position and data config
+  private final SendableChooser<String> zoneChooser = new SendableChooser<>();
+
+  ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
+  NetworkTableEntry turPos = shooterTab.add("Turret Position (ticks)", 0)
+    .withWidget(BuiltInWidgets.kNumberBar)
+    .withProperties(Map.of("min", turretLeftStop, "max", turretRightStop))
+    .withSize(2, 1)
+    .withPosition(0, 0).getEntry();
+  NetworkTableEntry hoodTicks = shooterTab.add("Hood Ticks", 0)
+    .withPosition(2, 0).getEntry();
+  NetworkTableEntry shootRPM = shooterTab.add("Shooter RPM", 0)
+    .withWidget(BuiltInWidgets.kGraph)
+    .withPosition(0, 1).getEntry();
+  NetworkTableEntry distFromPort = shooterTab.add("Distance from Outer Port", 0)
+    .withWidget(BuiltInWidgets.kNumberBar)
+    .withProperties(Map.of("min", 12, "max", 629))
+    .withSize(3, 1)
+    .withPosition(4, 0).getEntry();
+  ComplexWidget toGoZoneTicks = shooterTab.add("Shooting in Zone", zoneChooser).withWidget(BuiltInWidgets.kComboBoxChooser)
+    .withPosition(4, 2).withSize(2, 1);
+  
+  public ShuffleboardTab getTab() {
+    return shooterTab;
+  }
 
   public Sub_Shooter() {
    //Sets the right falcon to follow the opposite of that the left falcon is doing
@@ -147,6 +136,8 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
 
    //Ramp rate to make sure hood neo finds home cleanly
    hoodNeo.setOpenLoopRampRate(0.4);
+
+   addZoneOptions();
   }
   
   //Shuffleboard value update method
@@ -154,12 +145,19 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     turPos.setDouble(turretTalon.getSelectedSensorPosition());
     hoodTicks.setDouble(hoodNeo.getEncoder().getPosition());
     shootRPM.setDouble(flywheelFalconLeft.getSelectedSensorVelocity());
-    distFromHome.setDouble(turretDistFromHome());
-    hoodTemp.setDouble(hoodNeo.getMotorTemperature());
     distFromPort.setDouble(getPortDist());
-    hoodCurrent.setDouble(hoodNEOCurrentDraw());
-    homeFound.setString(Boolean.toString(wasHomeFound));
-    turretSpeed.setDouble(turretTalon.getMotorOutputPercent());
+  }
+
+  public void hoodZoneControl() {
+     double[] zoneTicks = {0, 0, 0, 0}; // empirically tested hood tick values
+     hoodGoToPos(zoneTicks[Integer.parseInt(zoneChooser.getSelected())]);
+   }
+
+  public void addZoneOptions() {
+    zoneChooser.addOption("0: Green", "0");
+    zoneChooser.addOption("1: Yellow", "1");
+    zoneChooser.addOption("2: Blue", "2");
+    zoneChooser.addOption("3: Red", "3");
   }
 
   // TODO: Merge logic from spinTurretMotor and hardStopConfiguration
@@ -242,14 +240,11 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     if ((turretCurrentPos > turretHome) && (turretCurrentPos - turretHome > 50)) {
       // If you're to the right of the center, move left until you're within 50 ticks (turret deadband)
       spinTurretMotor(0.3);
-      turretDirection.setString("Going left");
     } else if ((turretCurrentPos < turretHome) && (turretCurrentPos - turretHome < -50)) {
       // If you're to the left of the center, move right until you're within 50 ticks
       spinTurretMotor(-0.3);
-      turretDirection.setString("Going right");
     } else {
       spinTurretMotor(0);
-      turretDirection.setString("At home");
     }
   }
 
@@ -331,20 +326,12 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     }
   }
 
-  public void hoodZoneControl(int zone) {
-   // zone parameter is a number 0-3 indicating which zone robot is in (0 is green, 3 is red)
-    double[] zoneTicks = {0, 0, 0, 0}; // empirically tested hood tick values
-    hoodGoToPos(zoneTicks[zone]);
-  }
-
   @Override
   public void periodic() {
-    //Periodic methods that are always needed for shooter to work-----------------------------
     updateLimelight();
     hardStopConfiguration();
     turretCurrentPos = turretTalon.getSelectedSensorPosition();
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
-    //----------------------------------------------------------------------------------------
   }
 
   //Adding CAN devices for diagnostic LEDs

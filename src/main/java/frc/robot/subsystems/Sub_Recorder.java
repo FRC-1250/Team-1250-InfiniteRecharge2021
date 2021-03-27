@@ -93,7 +93,7 @@ public class Sub_Recorder extends SubsystemBase {
 
   public String getDirPath() {
     if(Robot.isSimulation()) {
-      return  "C:\\Users\\FRC-RL\\Desktop\\ReplayFiles";
+      return  "C:\\Users\\asaka\\Desktop";
     } else {
       return "/home/lvuser/auton_record/"; 
     }
