@@ -24,8 +24,10 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.controller.PIDController;
 import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
+import edu.wpi.first.wpilibj.shuffleboard.ComplexWidget;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.utilities.CAN_DeviceFaults;
@@ -52,24 +54,39 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   NetworkTableEntry tableTx, tableTy, tableTv;
   double tx, ty, tv;
 
+  //Hood neo PID values
+  double hoodP = Constants.SHOOT_HOOD_P;
+  double hoodI = Constants.SHOOT_HOOD_I;
+  double hoodD = Constants.SHOOT_HOOD_D;
+
+  //Flywheel PIDF values
+  double flywheelP = Constants.SHOOT_FLYWHEEL_P;
+  double flywheelI = Constants.SHOOT_FLYWHEEL_I;
+  double flywheelD = Constants.SHOOT_FLYWHEEL_D;
+  double flywheelF = Constants.SHOOT_FLYWHEEL_F;
+
   // Shuffleboard position and data config
+  private final SendableChooser<String> zoneChooser = new SendableChooser<>();
+
   ShuffleboardTab shooterTab = Shuffleboard.getTab("Shooter");
-  NetworkTableEntry turPos = shooterTab.add("Turret Position (ticks)", 0).withWidget(BuiltInWidgets.kNumberBar)
-      .withProperties(Map.of("min", Constants.SHOOT_TURRET_LEFT_BOUND, "max", Constants.SHOOT_TURRET_RIGHT_BOUND))
-      .withSize(2, 1).withPosition(0, 0).getEntry();
-  NetworkTableEntry distFromHome = shooterTab.add("Turret Distance from Home (ticks)", 0).withSize(2, 1)
-      .withPosition(2, 0).getEntry();
-  NetworkTableEntry hoodTemp = shooterTab.add("Hood Temp", 0).withPosition(4, 0).getEntry();
-  NetworkTableEntry hoodTicks = shooterTab.add("Hood Ticks", 0).withPosition(4, 2).getEntry();
-  NetworkTableEntry hoodCurrent = shooterTab.add("Hood Current", 0).withPosition(4, 1).getEntry();
-  NetworkTableEntry shootRPM = shooterTab.add("Shooter RPM", 0).withWidget(BuiltInWidgets.kGraph).withPosition(5, 0)
-      .getEntry();
-  NetworkTableEntry distFromPort = shooterTab.add("Distance from Outer Port", 0).withWidget(BuiltInWidgets.kNumberBar)
-      .withProperties(Map.of("min", 12, "max", 629)).withSize(3, 1).withPosition(5, 2).getEntry();
-  NetworkTableEntry homeFound = shooterTab.add("Home Found", "false").withPosition(8, 1).getEntry();
-  NetworkTableEntry turretSpeed = shooterTab.add("Turrent Percent", -1).withPosition(8, 2).getEntry();
-  NetworkTableEntry turretDirection = shooterTab.add("Turret Direction", "").withPosition(8, 4).withSize(2, 1)
-      .getEntry();
+  NetworkTableEntry turPos = shooterTab.add("Turret Position (ticks)", 0)
+    .withWidget(BuiltInWidgets.kNumberBar)
+    .withProperties(Map.of("min", Constants.SHOOT_TURRET_LEFT_BOUND, "max", Constants.SHOOT_TURRET_RIGHT_BOUND))
+    .withSize(2, 1)
+    .withPosition(0, 0).getEntry();
+  NetworkTableEntry hoodTicks = shooterTab.add("Hood Ticks", 0)
+    .withPosition(2, 0).getEntry();
+  NetworkTableEntry shootRPM = shooterTab.add("Shooter RPM", 0)
+    .withWidget(BuiltInWidgets.kGraph)
+    .withPosition(0, 1).getEntry();
+  NetworkTableEntry distFromPort = shooterTab.add("Distance from Outer Port", 0)
+    .withWidget(BuiltInWidgets.kNumberBar)
+    .withProperties(Map.of("min", 12, "max", 629))
+    .withSize(3, 1)
+    .withPosition(4, 0).getEntry();
+  ComplexWidget toGoZoneTicks = shooterTab.add("Shooting in Zone", zoneChooser).withWidget(BuiltInWidgets.kComboBoxChooser)
+    .withPosition(4, 2).withSize(2, 1);
+
 
   public Sub_Shooter() {
     // Sets the right falcon to follow the opposite of that the left falcon is doing
@@ -101,6 +118,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     hoodNeo.setOpenLoopRampRate(0.4);
 
     NetworkTableInstance.getDefault().getTable("limelight").getEntry("ledMode").setNumber(3);
+    addZoneOptions();
   }
 
   // Flywheels
@@ -124,12 +142,19 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     turPos.setDouble(turretTalon.getSelectedSensorPosition());
     hoodTicks.setDouble(hoodNeo.getEncoder().getPosition());
     shootRPM.setDouble(flywheelFalconLeft.getSelectedSensorVelocity());
-    distFromHome.setDouble(turretDistFromHome());
-    hoodTemp.setDouble(hoodNeo.getMotorTemperature());
     distFromPort.setDouble(getPortDist());
-    hoodCurrent.setDouble(hoodNEOCurrentDraw());
-    homeFound.setString(Boolean.toString(wasHomeFound));
-    turretSpeed.setDouble(turretTalon.getMotorOutputPercent());
+  }
+
+  public void hoodZoneControl() {
+     double[] zoneTicks = {0, 0, 0, 0}; // empirically tested hood tick values
+     hoodGoToPos(zoneTicks[Integer.parseInt(zoneChooser.getSelected())]);
+   }
+
+  public void addZoneOptions() {
+    zoneChooser.addOption("0: Green", "0");
+    zoneChooser.addOption("1: Yellow", "1");
+    zoneChooser.addOption("2: Blue", "2");
+    zoneChooser.addOption("3: Red", "3");
   }
 
   public ShuffleboardTab getTab() {
@@ -160,15 +185,12 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
       // If you're to the right of the center, move left until you're within 50 ticks
       // (turret deadband)
       rotateTurret(0.3);
-      turretDirection.setString("Going left");
     } else if ((turretCurrentPosition < Constants.SHOOT_TURRET_HOME)
         && (turretCurrentPosition - Constants.SHOOT_TURRET_HOME < -50)) {
       // If you're to the left of the center, move right until you're within 50 ticks
       rotateTurret(-0.3);
-      turretDirection.setString("Going right");
     } else {
       rotateTurret(0);
-      turretDirection.setString("At home");
     }
   }
 
@@ -323,10 +345,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
 
   @Override
   public void periodic() {
-    // Periodic methods that are always needed for shooter to
-    // work-----------------------------
     updateLimelight();
-    // ----------------------------------------------------------------------------------------
   }
 
   // Adding CAN devices for diagnostic LEDs

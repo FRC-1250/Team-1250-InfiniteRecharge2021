@@ -22,6 +22,6 @@ public class CmdI_IntakeStart extends InstantCommand {
   @Override
   public void initialize() {
     s_intake.extendCylinder();
-    s_intake.spinIntakeMotor(0.8);
+    s_intake.spinIntakeMotor(1);
   }
 }

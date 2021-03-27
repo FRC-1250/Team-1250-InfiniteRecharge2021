@@ -18,8 +18,7 @@ public class Cmd_HoodGoToPos extends CommandBase {
   public Cmd_HoodGoToPos(Sub_Shooter shooter, double ticks) {
     s_shooter = shooter;
     addRequirements(shooter);
-    ticksToGo = ticks;  
-
+    ticksToGo = ticks;
   }
 
   // Called when the command is initially scheduled.

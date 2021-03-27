@@ -10,11 +10,12 @@ package frc.robot.commands.intake;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.Sub_Intake;
 
-public class CmdI_IntakeStop extends InstantCommand {
-
+// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
+// information, see:
+// https://docs.wpilib.org/en/latest/docs/software/commandbased/convenience-features.html
+public class CmdI_StopCollect extends InstantCommand {
   private final Sub_Intake s_intake;
-
-  public CmdI_IntakeStop(Sub_Intake intake) {
+  public CmdI_StopCollect(Sub_Intake intake) {
     s_intake = intake;
     addRequirements(intake);
   }

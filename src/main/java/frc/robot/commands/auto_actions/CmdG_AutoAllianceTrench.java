@@ -10,7 +10,6 @@ package frc.robot.commands.auto_actions;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.commands.drive.Cmd_AutoDrive;
 import frc.robot.commands.drive.Cmd_AutoTurn;
-import frc.robot.commands.intake.Cmd_Collect;
 import frc.robot.commands.intake.CmdI_IntakeStart;
 import frc.robot.commands.intake.CmdI_IntakeStop;
 import frc.robot.commands.shooter.Cmd_HoodGoToPos;
