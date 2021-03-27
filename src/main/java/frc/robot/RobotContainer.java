@@ -40,20 +40,27 @@ public class RobotContainer {
   public static final Sub_Hopper s_hopper = new Sub_Hopper();
   public static final Sub_Recorder s_recorder = new Sub_Recorder();
 
-  // Buttons
-  public static Joystick Gamepad = new Joystick(0);
-  private static Joystick Gamepad1 = new Joystick(1);
-  private static JoystickButton x = new JoystickButton(Gamepad, 1);
-  private static JoystickButton a = new JoystickButton(Gamepad, 2);
-  private static JoystickButton b = new JoystickButton(Gamepad, 3);
-  private static JoystickButton y = new JoystickButton(Gamepad, 4);
-  private static JoystickButton back = new JoystickButton(Gamepad, 9);
-  private static JoystickButton start = new JoystickButton(Gamepad, 10);
-  private static JoystickButton unjam = new JoystickButton(Gamepad1, 3);
-  public static JoystickButton panelMode = new JoystickButton(Gamepad1, Constants.PANEL_MODE);
-  public static JoystickButton shootMode = new JoystickButton(Gamepad1, Constants.SHOOT_MODE);
-  public static JoystickButton climbMode = new JoystickButton(Gamepad1, Constants.CLIMB_MODE);
-  public static JoystickButton unjamMode = new JoystickButton(Gamepad1, Constants.UNJAM_MODE);
+   // Driver joystick and buttons for logitech gamepad.
+   Joystick driver = new Joystick(0);
+   JoystickButton driverXButton = new JoystickButton(driver, Constants.X_BUTTON);
+   JoystickButton driverYButton = new JoystickButton(driver, Constants.Y_BUTTON);
+   JoystickButton driverAButton = new JoystickButton(driver, Constants.A_BUTTON);
+   JoystickButton driverBButton = new JoystickButton(driver, Constants.B_BUTTON);
+   JoystickButton driverBackButton = new JoystickButton(driver, Constants.BACK_BUTTON);
+   JoystickButton driverStartButton = new JoystickButton(driver, Constants.START_BUTTON);
+   JoystickButton driverLeftBumper = new JoystickButton(driver, Constants.LEFT_BUMPER);
+   JoystickButton driverRightBumper = new JoystickButton(driver, Constants.RIGHT_BUMPER);
+   JoystickButton driverLeftTrigger = new JoystickButton(driver, Constants.LEFT_TRIGEER);
+   JoystickButton driverRightTrigger = new JoystickButton(driver, Constants.RIGHT_TRIGGER);
+   JoystickButton driverLeftStickClick = new JoystickButton(driver, Constants.LEFT_STICK_CLICK);
+   JoystickButton driverRightStickClick = new JoystickButton(driver, Constants.RIGHT_STICK_CLICK);
+ 
+   // Operator joystick and buttons
+   Joystick operator = new Joystick(1);
+   JoystickButton operatorClimbButton = new JoystickButton(operator, Constants.CLIMB_MODE);
+   JoystickButton operatorShootButton = new JoystickButton(operator, Constants.SHOOT_MODE);
+   JoystickButton operatorPanelButton = new JoystickButton(operator, Constants.PANEL_MODE);
+   JoystickButton operatorUnjamButton = new JoystickButton(operator, Constants.UNJAM_MODE);
 
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
