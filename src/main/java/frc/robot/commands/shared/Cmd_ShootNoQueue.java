@@ -8,14 +8,14 @@ import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Sub_Hopper;
 import frc.robot.subsystems.Sub_Shooter;
 
-public class Cmd_ShootAutoZone extends CommandBase {
+public class Cmd_ShootNoQueue extends CommandBase {
   private final Sub_Hopper s_hopper;
   private final Sub_Shooter s_shooter;
   int flywheelSpeedInTicks = 20000;
-  double deadbandPercentage = 0.025;
+  double deadbandPercentage = 0.05;
   boolean shooterPrimed = false;
 
-  public Cmd_ShootAutoZone(Sub_Hopper hopper, Sub_Shooter shooter) {
+  public Cmd_ShootNoQueue(Sub_Hopper hopper, Sub_Shooter shooter) {
     this.s_hopper = hopper;
     this.s_shooter = shooter;
     addRequirements(hopper, shooter);
@@ -28,30 +28,24 @@ public class Cmd_ShootAutoZone extends CommandBase {
 
   @Override
   public void execute() {
-    s_shooter.hoodZoneControl();
     s_shooter.track();
     s_shooter.setFlywheelVelocityControl(flywheelSpeedInTicks);
 
     shooterPrimed = s_shooter.limelightSeesTarget()
         && (s_shooter.getFlyWheelSpeed() > flywheelSpeedInTicks - (flywheelSpeedInTicks * deadbandPercentage));
 
-    if(shooterPrimed && s_hopper.getSensor()) {
+    if(shooterPrimed) {
       s_hopper.spinUptakeMotor(1);
       s_hopper.spinHopperMotors(0.6);
-    } else if (!shooterPrimed && s_hopper.getSensor()) {
+    } else if (!shooterPrimed) {
       s_hopper.spinUptakeMotor(0);
-      s_hopper.spinHopperMotors(0.2);
-    } else if (shooterPrimed && !s_hopper.getSensor()) {
-      s_hopper.spinUptakeMotor(0.4);
-      s_hopper.spinHopperMotors(0.2);
-    } else if (!shooterPrimed && !s_hopper.getSensor()) {
-      s_hopper.spinUptakeMotor(0.4);
       s_hopper.spinHopperMotors(0.2);
     }
   }
 
   @Override
   public void end(boolean interrupted) {
+    //Explicitly stop the turret motor on end and interrupt
     s_shooter.rotateTurret(0);
   }
 

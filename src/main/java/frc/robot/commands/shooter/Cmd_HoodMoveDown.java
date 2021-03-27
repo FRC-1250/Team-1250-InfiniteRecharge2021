@@ -33,7 +33,7 @@ public class Cmd_HoodMoveDown extends CommandBase {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    s_shooter.spinHoodMotor(-0.3);
+    s_shooter.spinHoodMotor(-0.1);
   }
 
   // Called once the command ends or is interrupted.

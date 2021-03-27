@@ -33,7 +33,7 @@ public class Cmd_TankDrive extends CommandBase {
   @Override
   public void execute() {
     //s_drivetrain.drive(Gamepad);
-    s_drivetrain.drive(Gamepad);
+    s_drivetrain.driveArcade(Gamepad);
   }
 
   // Called once the command ends or is interrupted.

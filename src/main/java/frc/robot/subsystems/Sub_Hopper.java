@@ -15,6 +15,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -41,6 +42,12 @@ public class Sub_Hopper extends SubsystemBase implements CAN_Input {
   NetworkTableEntry sensorValue = hopperTab.add("Sensor Value", 0)
     .withPosition(4, 0)
     .getEntry();
+  NetworkTableEntry uptakeVolts = hopperTab.add("Uptake Volts", 0)
+    .withWidget(BuiltInWidgets.kGraph)
+    .withPosition(0, 1).getEntry();
+  NetworkTableEntry uptakeAmps = hopperTab.add("Uptake Current", 0)
+    .withWidget(BuiltInWidgets.kGraph)
+    .withPosition(0, 1).getEntry();
   
   public ShuffleboardTab getTab() { return hopperTab; }
   //
@@ -53,11 +60,13 @@ public class Sub_Hopper extends SubsystemBase implements CAN_Input {
 
   public void setShuffleboard() {
     sensorValue.setDouble(uptakeSensor.getValue());
+    uptakeVolts.setDouble(uptakeMotor.getMotorOutputVoltage());
+    uptakeAmps.setDouble(uptakeMotor.getOutputCurrent());
   }
 
   public void spinHopperMotors(double speed) {
     leftMotor.set(speed);
-    rightMotor.set(speed * 0.5);
+    rightMotor.set(speed * 0.75);
   }
 
   public void spinUptakeMotor(double speed) {

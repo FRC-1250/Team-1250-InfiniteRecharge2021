@@ -12,11 +12,14 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.auto_actions.Cmd_PlayAutoRecord;
 import frc.robot.commands.auto_actions.Cmd_StartAutoRecord;
+import frc.robot.commands.hopper.Cmd_HopManageNoQueue;
 import frc.robot.commands.hopper.Cmd_HopperManagement;
+import frc.robot.commands.hopper.Cmd_UnjamHopper;
 import frc.robot.commands.intake.CmdI_IntakeStart;
 import frc.robot.commands.intake.CmdI_IntakeStop;
 import frc.robot.commands.shared.Cmd_Shoot;
 import frc.robot.commands.shared.Cmd_ShootAutoZone;
+import frc.robot.commands.shooter.Cmd_HoodGoToSBTicks;
 import frc.robot.commands.shooter.Cmd_HoodMove;
 import frc.robot.commands.shooter.Cmd_HoodMoveDown;
 import frc.robot.commands.shooter.Cmd_ShooterIdle;
@@ -68,6 +71,10 @@ public class RobotContainer {
    JoystickButton operatorShootButton = new JoystickButton(operator, Constants.SHOOT_MODE);
    JoystickButton operatorPanelButton = new JoystickButton(operator, Constants.PANEL_MODE);
    JoystickButton operatorUnjamButton = new JoystickButton(operator, Constants.UNJAM_MODE);
+   JoystickButton operatorXButton = new JoystickButton(operator, Constants.X_BUTTON);
+   JoystickButton operatorYButton = new JoystickButton(operator, Constants.Y_BUTTON);
+   JoystickButton operatorAButton = new JoystickButton(operator, Constants.A_BUTTON);
+   JoystickButton operatorBButton = new JoystickButton(operator, Constants.B_BUTTON);
 
   // Co-op triggers
   // Driver action button -> Right bumper
@@ -126,12 +133,16 @@ public class RobotContainer {
     } else {
       driverRightTrigger.whileActiveOnce(new Cmd_Shoot(s_hopper, s_shooter));
       driverRightBumper.whileActiveOnce(new Cmd_ShootAutoZone(s_hopper, s_shooter));
-      driverXButton.toggleWhenActive(new Cmd_StartAutoRecord(s_recorder, s_drivetrain));
-      driverBButton.whenActive(new Cmd_PlayAutoRecord(s_recorder, s_drivetrain));
+      // driverXButton.toggleWhenActive(new Cmd_StartAutoRecord(s_recorder, s_drivetrain));
+      // driverBButton.whenActive(new Cmd_PlayAutoRecord(s_recorder, s_drivetrain));
       driverLeftBumper.whenActive(new CmdI_IntakeStart(s_intake));
       driverLeftTrigger.whenActive(new CmdI_IntakeStop(s_intake));
-      driverAButton.whenHeld(new Cmd_HoodMove(s_shooter, driver));
-      driverYButton.whenHeld(new Cmd_HoodMoveDown(s_shooter, driver));
+      // driverAButton.whenHeld(new Cmd_HoodMove(s_shooter, driver));
+      // driverYButton.whenHeld(new Cmd_HoodMoveDown(s_shooter, driver));
+      driverBackButton.whenHeld(new Cmd_UnjamHopper(s_hopper, s_intake));
+      driverStartButton.whenHeld(new Cmd_HoodGoToSBTicks(s_shooter));
+      operatorAButton.whenHeld(new Cmd_HoodMove(s_shooter, driver));
+      operatorYButton.whenHeld(new Cmd_HoodMoveDown(s_shooter, driver));
     }
   }
 

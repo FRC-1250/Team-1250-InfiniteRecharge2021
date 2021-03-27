@@ -53,7 +53,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
-    RobotContainer.s_drivetrain.idleMode(IdleMode.kBrake);
+    RobotContainer.s_drivetrain.idleMode(IdleMode.kCoast);
   }
 
   @Override

@@ -86,6 +86,10 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     .withPosition(4, 0).getEntry();
   ComplexWidget toGoZoneTicks = shooterTab.add("Shooting in Zone", zoneChooser).withWidget(BuiltInWidgets.kComboBoxChooser)
     .withPosition(4, 2).withSize(2, 1);
+  NetworkTableEntry toGoOffset = shooterTab.add("Offset Degrees", 0)
+    .withPosition(4, 3).withSize(2, 1).getEntry();
+  NetworkTableEntry toGoHoodTicks = shooterTab.add("To Go Turret Ticks", -3)
+    .withPosition(4, 4).withSize(2, 1).getEntry();
 
 
   public Sub_Shooter() {
@@ -146,7 +150,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   }
 
   public void hoodZoneControl() {
-     double[] zoneTicks = {-81.7, 0, 0, 0}; // empirically tested hood tick values
+     double[] zoneTicks = {-22.9, -66.9, -62, -50.5}; // empirically tested hood tick values
      hoodGoToPos(zoneTicks[Integer.parseInt(zoneChooser.getSelected())]);
    }
 
@@ -155,6 +159,10 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     zoneChooser.addOption("1: Yellow", "1");
     zoneChooser.addOption("2: Blue", "2");
     zoneChooser.addOption("3: Red", "3"); // 3 is closest to tower
+  }
+
+  public double getSBHoodTicks() {
+    return toGoHoodTicks.getDouble(-3);
   }
 
   public ShuffleboardTab getTab() {
@@ -282,13 +290,6 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     }
   }
 
-  public void hoodZoneControl(int zone) {
-    // zone parameter is a number 0-3 indicating which zone robot is in (0 is green,
-    // 3 is red)
-    double[] zoneTicks = { 0, 0, 0, 0 }; // empirically tested hood tick values
-    hoodGoToPos(zoneTicks[zone]);
-  }
-
   // Limelight
   // Void to updates the limelight values
   public void updateLimelight() {
@@ -305,7 +306,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   // controller
   public void track() {
     if (limelightSeesTarget()) {
-      double heading_error = -tx + 0; // in order to change the target offset (in degrees), add it here
+      double heading_error = -tx - toGoOffset.getDouble(0); // in order to change the target offset (in degrees), add it here
       // How much the limelight is looking away from the target (in degrees)
 
       double steering_adjust = turretPIDController.calculate(heading_error);
