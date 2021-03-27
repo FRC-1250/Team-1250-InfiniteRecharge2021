@@ -16,6 +16,9 @@ import frc.robot.commands.hopper.Cmd_HopperManagement;
 import frc.robot.commands.intake.CmdI_IntakeStart;
 import frc.robot.commands.intake.CmdI_IntakeStop;
 import frc.robot.commands.shared.Cmd_Shoot;
+import frc.robot.commands.shared.Cmd_ShootAutoZone;
+import frc.robot.commands.shooter.Cmd_HoodMove;
+import frc.robot.commands.shooter.Cmd_HoodMoveDown;
 import frc.robot.commands.shooter.Cmd_ShooterIdle;
 import frc.robot.subsystems.Sub_Climber;
 import frc.robot.subsystems.Sub_Drivetrain;
@@ -121,11 +124,14 @@ public class RobotContainer {
     if (coopMode) {
       // Add co-op buttons here
     } else {
-      driverRightBumper.whileActiveOnce(new Cmd_Shoot(s_hopper, s_shooter));
+      driverRightTrigger.whileActiveOnce(new Cmd_Shoot(s_hopper, s_shooter));
+      driverRightBumper.whileActiveOnce(new Cmd_ShootAutoZone(s_hopper, s_shooter));
       driverXButton.toggleWhenActive(new Cmd_StartAutoRecord(s_recorder, s_drivetrain));
-      driverYButton.whenActive(new Cmd_PlayAutoRecord(s_recorder, s_drivetrain));
+      driverBButton.whenActive(new Cmd_PlayAutoRecord(s_recorder, s_drivetrain));
       driverLeftBumper.whenActive(new CmdI_IntakeStart(s_intake));
       driverLeftTrigger.whenActive(new CmdI_IntakeStop(s_intake));
+      driverAButton.whenHeld(new Cmd_HoodMove(s_shooter, driver));
+      driverYButton.whenHeld(new Cmd_HoodMoveDown(s_shooter, driver));
     }
   }
 

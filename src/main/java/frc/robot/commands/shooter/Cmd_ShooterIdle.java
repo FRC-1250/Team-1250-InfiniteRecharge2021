@@ -30,7 +30,7 @@ public class Cmd_ShooterIdle extends CommandBase {
     }
 
     if (s_shooter.isHomeFound()) {
-      if (!stayHome) {
+      if (stayHome) {
         s_shooter.hoodGoToPos(-3);
       }
     } else {

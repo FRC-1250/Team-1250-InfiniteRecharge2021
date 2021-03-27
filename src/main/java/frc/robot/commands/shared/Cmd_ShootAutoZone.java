@@ -52,7 +52,7 @@ public class Cmd_ShootAutoZone extends CommandBase {
 
   @Override
   public void end(boolean interrupted) {
-    s_shooter.spinTurretMotor(0);
+    s_shooter.rotateTurret(0);
   }
 
   @Override

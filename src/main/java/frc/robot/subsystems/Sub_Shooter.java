@@ -146,7 +146,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   }
 
   public void hoodZoneControl() {
-     double[] zoneTicks = {0, 0, 0, 0}; // empirically tested hood tick values
+     double[] zoneTicks = {-81.7, 0, 0, 0}; // empirically tested hood tick values
      hoodGoToPos(zoneTicks[Integer.parseInt(zoneChooser.getSelected())]);
    }
 
@@ -154,7 +154,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
     zoneChooser.addOption("0: Green", "0");
     zoneChooser.addOption("1: Yellow", "1");
     zoneChooser.addOption("2: Blue", "2");
-    zoneChooser.addOption("3: Red", "3");
+    zoneChooser.addOption("3: Red", "3"); // 3 is closest to tower
   }
 
   public ShuffleboardTab getTab() {
@@ -346,6 +346,7 @@ public class Sub_Shooter extends SubsystemBase implements CAN_Input {
   @Override
   public void periodic() {
     updateLimelight();
+    setShuffleboard();
   }
 
   // Adding CAN devices for diagnostic LEDs

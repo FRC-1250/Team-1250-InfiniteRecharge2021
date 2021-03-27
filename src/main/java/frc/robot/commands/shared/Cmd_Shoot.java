@@ -28,7 +28,6 @@ public class Cmd_Shoot extends CommandBase {
 
   @Override
   public void execute() {
-    s_shooter.hoodGoToPos(-68);
     s_shooter.track();
     s_shooter.setFlywheelVelocityControl(flywheelSpeedInTicks);
 
