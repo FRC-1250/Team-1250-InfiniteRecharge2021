@@ -72,6 +72,8 @@ public final class Constants {
     public static final double SHOOT_HOOD_I = 0;
     public static final double SHOOT_HOOD_D = 0;
 
+    public static final int HOOD_HOME_COLLISION_AMPS = 22;
+
     public static final double SHOOT_FLYWHEEL_P = 1;
     public static final double SHOOT_FLYWHEEL_I = 0;
     public static final double SHOOT_FLYWHEEL_D = 0;
