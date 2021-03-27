@@ -7,39 +7,21 @@
 
 package frc.robot.commands.intake;
 
-import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Sub_Hopper;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.Sub_Intake;
 
-public class Cmd_StopCollect extends CommandBase {
-  /**
-   * Creates a new Cmd_StopCollect.
-   */
+public class CmdI_IntakeStart extends InstantCommand {
+
   private final Sub_Intake s_intake;
-  private final Sub_Hopper s_hopper;
-  public Cmd_StopCollect(Sub_Intake intake, Sub_Hopper hopper) {
+
+  public CmdI_IntakeStart(Sub_Intake intake) {
     s_intake = intake;
-    s_hopper = hopper;
-    addRequirements(intake, hopper);
+    addRequirements(intake);
   }
 
   @Override
   public void initialize() {
-   
-  }
-
-  @Override
-  public void execute() {
-    s_intake.spinIntakeMotor(0);
-    s_intake.retractCylinder();
-  }
-
-  @Override
-  public void end(boolean interrupted) {
-  }
-
-  @Override
-  public boolean isFinished() {
-    return false;
+    s_intake.extendCylinder();
+    s_intake.spinIntakeMotor(0.8);
   }
 }
