@@ -18,8 +18,6 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
-import frc.robot.Robot;
-import frc.robot.RobotContainer;
 import frc.robot.utilities.CAN_DeviceFaults;
 import frc.robot.utilities.CAN_Input;
 
@@ -32,7 +30,6 @@ public class Sub_Intake extends SubsystemBase implements CAN_Input {
   Joystick Gamepad0 = new Joystick(0);
   Joystick Gamepad1 = new Joystick(1);
 
-
   // Shuffleboard
   ShuffleboardTab intakeTab = Shuffleboard.getTab("Intake");
   NetworkTableEntry curDraw = intakeTab.add("Intake Speed", 0)
@@ -40,7 +37,6 @@ public class Sub_Intake extends SubsystemBase implements CAN_Input {
     .getEntry();
 
   public ShuffleboardTab getTab() { return intakeTab; }
-  //
 
   public Sub_Intake() {
     retractCylinder();

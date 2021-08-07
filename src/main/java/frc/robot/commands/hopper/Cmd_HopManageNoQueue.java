@@ -5,30 +5,30 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.commands.intake;
+package frc.robot.commands.hopper;
 
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.subsystems.Sub_Intake;
+import frc.robot.Constants;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.Sub_Hopper;
 
-public class Cmd_Collect extends CommandBase {
-  /**
-   * Creates a new Cmd_Collect.
-   */
-  private final Sub_Intake s_intake;
-  public Cmd_Collect(Sub_Intake intake) {
-    s_intake = intake;
-    addRequirements(intake);
+public class Cmd_HopManageNoQueue extends CommandBase {
+  
+  private final Sub_Hopper s_hopper;
+  public Cmd_HopManageNoQueue(Sub_Hopper hopper) {
+    s_hopper = hopper;
+    addRequirements(hopper);
   }
 
   @Override
   public void initialize() {
- 
   }
 
   @Override
   public void execute() {
-    s_intake.spinIntakeMotor(1);
-    s_intake.extendCylinder();
+    s_hopper.spinHopperMotors(0.2);
+    s_hopper.spinUptakeMotor(0);
   }
 
   @Override

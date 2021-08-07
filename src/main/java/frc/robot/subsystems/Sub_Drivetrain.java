@@ -53,10 +53,6 @@ public class Sub_Drivetrain extends SubsystemBase implements CAN_Input {
   
   Solenoid solPTO = new Solenoid(Constants.CLM_SOL_PTO);
 
-  CANPIDController driveLeftPID = new CANPIDController(bLeftMotor);
-  CANPIDController driveRightPID = new CANPIDController(bRightMotor);
-
-
   //Other devices
   // AnalogGyro gyro = new AnalogGyro(1);
   AnalogGyro gyro = new AnalogGyro(1);
@@ -67,27 +63,12 @@ public class Sub_Drivetrain extends SubsystemBase implements CAN_Input {
 
   String mode;
   public static double accumError = 0;
-	//private final double AUTO_TURN_RATE = 0.3;
-  //private final double KI_SIMPLE = 0.03;
   public double driveSetpoint = 0;
 
   public boolean isPTOEngaged = false;
 
   // Shuffleboard
   ShuffleboardTab driveTab = Shuffleboard.getTab("Drive");
-  NetworkTableEntry lRPM = driveTab.add("Left RPM", 0).withPosition(0, 1).getEntry();
-  NetworkTableEntry rRPM = driveTab.add("Right RPM", 0).withPosition(2, 1).getEntry();
-  NetworkTableEntry leftTicks = driveTab.add("Left Ticks", -1).withPosition(1, 1).getEntry();
-  NetworkTableEntry lCurrentDraw = driveTab.add("Left Cur Draw", 0)
-    .withWidget(BuiltInWidgets.kNumberBar)
-    .withProperties(Map.of("min", 0, "max", 100))
-    .withPosition(0, 0)
-    .getEntry();
-  NetworkTableEntry rCurrentDraw = driveTab.add("Right Cur Draw", 0)
-    .withWidget(BuiltInWidgets.kNumberBar)
-    .withProperties(Map.of("min", 0, "max", 100))
-    .withPosition(2, 0)
-    .getEntry();
   NetworkTableEntry gyroValue = driveTab.add("Gyro Angle", -1)
     .withPosition(3, 0)
     .getEntry();
@@ -104,24 +85,11 @@ public class Sub_Drivetrain extends SubsystemBase implements CAN_Input {
     fRightMotor.follow(bRightMotor);
     fLeftMotor.follow(bLeftMotor);
 
-    driveRightPID.setP(0.05);
-    driveRightPID.setI(0.0);
-    driveRightPID.setD(0.0);
-
-    driveLeftPID.setP(0.05);
-    driveLeftPID.setI(0.0);
-    driveLeftPID.setD(0.0);
-
     setDefaultCommand(new Cmd_TankDrive(this));
 
   }
 
   public void setShuffleboard() {
-    lRPM.setDouble(getVelocity(fLeftMotor));
-    rRPM.setDouble(getVelocity(fRightMotor));
-    leftTicks.setDouble(fLeftMotor.getEncoder().getPosition());
-    lCurrentDraw.setDouble(fLeftMotor.getOutputCurrent());
-    rCurrentDraw.setDouble(fRightMotor.getOutputCurrent());
     gyroValue.setDouble(getGyroAngle());
   }
 
@@ -277,12 +245,6 @@ public class Sub_Drivetrain extends SubsystemBase implements CAN_Input {
     diffDriveGroup.arcadeDrive(-linearRamp(upperSpeed,lowerSpeed) * sign, 0 + -offset);
   }
 
-  public void newDriveTopos(double dist){
-    double ticks = dist * Constants.DRV_TICKS_TO_INCH;
-    driveRightPID.setReference(ticks, ControlType.kPosition);
-    driveLeftPID.setReference(-ticks, ControlType.kPosition);
-  }
-
   //Executes the turning of the robot for auton
   public void turn (double angle, double upperSpeed, double lowerSpeed){
     double corrected;
@@ -342,45 +304,7 @@ public class Sub_Drivetrain extends SubsystemBase implements CAN_Input {
 
   @Override
   public void periodic(){
-    mode = RobotContainer.s_stateManager.getRobotState();
-    Joystick Gamepad = new Joystick(0);
     linearDrivingAmpControl();
-    /*
-    if (Gamepad.getRawButton(12)) {
-      driveArcade(Gamepad);
-    } else if (isPTOEngaged){
-      diffDriveGroup.arcadeDrive(-Math.abs(Gamepad.getY()), 0);
-    }
-    else{
-      drive(Gamepad);
-    }
-    */
-    //Climber Logic
-    if (RobotContainer.s_stateManager.getRobotState() == "CLIMB_MODE") {
-      RobotContainer.s_panel.extendCylinder();
-      if (Gamepad.getRawButton(Constants.BTN_X)) {
-        RobotContainer.s_climb.extendBottomCylinder();
-        RobotContainer.s_climb.extendTopCylinder();
-      }
-      else if(Gamepad.getRawButton(Constants.BTN_Y)){
-        RobotContainer.s_climb.retractBottomCylinder();
-        RobotContainer.s_climb.retractTopCylinder();
-      }
-       else if (Gamepad.getRawButton(Constants.BTN_B)) {
-        RobotContainer.s_climb.retractBottomCylinder();
-        RobotContainer.s_climb.retractTopCylinder();
-        engagePTO();
-        isPTOEngaged = true;
-      }
-    } 
-    //Logic to deploy feet for defense
-    else if (Gamepad.getRawButton(Constants.LCLICK)) {
-      defenseMode();
-    } 
-    else {
-      disengagePTO();
-    }
-    setShuffleboard();
   }
  
   public Vector<CAN_DeviceFaults> input() {

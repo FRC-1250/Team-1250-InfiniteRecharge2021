@@ -72,6 +72,8 @@ public final class Constants {
     public static final double SHOOT_HOOD_I = 0;
     public static final double SHOOT_HOOD_D = 0;
 
+    public static final int HOOD_HOME_COLLISION_AMPS = 22;
+
     public static final double SHOOT_FLYWHEEL_P = 1;
     public static final double SHOOT_FLYWHEEL_I = 0;
     public static final double SHOOT_FLYWHEEL_D = 0;
@@ -85,18 +87,18 @@ public final class Constants {
     public static final int PANEL_MODE = 2;
     public static final int UNJAM_MODE = 3;
 
-    public static final int BTN_X = 1;
-    public static final int BTN_A = 2;
-    public static final int BTN_B = 3;
-    public static final int BTN_Y = 4;
-    public static final int LB = 5;
-    public static final int RB = 6;
-    public static final int LT = 7;
-    public static final int RT = 8;
-    public static final int BACK = 9;
-    public static final int START = 10;
-    public static final int LCLICK = 11;
-    public static final int RCLICK = 12;
+    public static final int X_BUTTON = 1;
+    public static final int A_BUTTON = 2;
+    public static final int B_BUTTON = 3;
+    public static final int Y_BUTTON = 4;
+    public static final int LEFT_BUMPER = 5;
+    public static final int RIGHT_BUMPER = 6;
+    public static final int LEFT_TRIGEER = 7;
+    public static final int RIGHT_TRIGGER = 8;
+    public static final int BACK_BUTTON = 9;
+    public static final int START_BUTTON = 10;
+    public static final int LEFT_STICK_CLICK = 11;
+    public static final int RIGHT_STICK_CLICK = 12;
     
     // ALL DEVICES WILL HAVE TO BE PUT IN ORDER OF PHYSICAL DAISY CHAIN (FOR CAN DIAGNOSTICS)
     /* 

@@ -7,10 +7,7 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
@@ -25,40 +22,14 @@ import com.revrobotics.CANSparkMax.IdleMode;
  */
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
-
   private RobotContainer m_robotContainer;
-  public static int halvesAroundPanel;
-
   public static boolean isItAuto;
-
-  public static AddressableLED ledStrip;
-  public static AddressableLEDBuffer ledStripBuffer;
-
-  SendableChooser<String> autoChooser = new SendableChooser<String>();
 
   @Override
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
-    RobotContainer.s_panel.retractCylinder();
-    RobotContainer.s_drivetrain.disengagePTO();
-
-    autoChooser.setDefaultOption("Straight_Shot", "Straight_Shot");
-    autoChooser.addOption("Whip", "Whip");
-
-      /* LEDS */
-    ledStrip = new AddressableLED(Constants.LED_PWM_PORT);
-    // Reuse buffer
-    // Default to a length of 60, start empty output
-    // Length is expensive to set, so only set it once, then just update data
-    ledStripBuffer = new AddressableLEDBuffer(30);
-    ledStrip.setLength(ledStripBuffer.getLength());
-
-    halvesAroundPanel = 0;
-    RobotContainer.s_util.initTime = System.currentTimeMillis();
-
-    ledStrip.start();
   }
 
   /**
@@ -75,10 +46,6 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-
-    //if (RobotContainer.s_util.checkCAN()) {
-    //  ledStrip.setData(ledStripBuffer);
-    //}
   }
 
   /**
@@ -86,7 +53,7 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void disabledInit() {
-    RobotContainer.s_drivetrain.idleMode(IdleMode.kBrake);
+    RobotContainer.s_drivetrain.idleMode(IdleMode.kCoast);
   }
 
   @Override

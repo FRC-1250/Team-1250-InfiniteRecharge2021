@@ -92,22 +92,23 @@ public class Sub_Recorder extends SubsystemBase {
   }
 
   public String getDirPath() {
-    if(Robot.isSimulation()) {
-      return  "C:\\Users\\FRC-RL\\Desktop\\ReplayFiles";
+    if (Robot.isSimulation()) {
+      return System.getProperty("user.home") + "/Desktop/ReplayFiles";
     } else {
-      return "/home/lvuser/auton_record/"; 
+      return "/home/lvuser/auton_record/";
     }
   }
 
   // Happens on startup; adds pre-existing files to Shuffleboard chooser
   public void addFileChooserOptions() {
     File folder = new File(getDirPath());
-    String[] listOfFiles = folder.list();
-    for (String file : listOfFiles) {
-      fileChooser.addOption(file, file);
+    if (folder != null) {
+      String[] listOfFiles = folder.list();
+      for (String file : listOfFiles) {
+        fileChooser.addOption(file, file);
+      }
     }
   }
-
   // Called when StartAutoRecord ends; adds the newly recorded file as a Shuffleboard option
   public void updateFileChooserOptions(String filename) {
     fileChooser.addOption(filename, filename);

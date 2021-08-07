@@ -5,45 +5,44 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.commands.diagnostic;
+package frc.robot.commands.shooter;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
 import frc.robot.subsystems.Sub_Shooter;
 
-public class Cmd_RunHood extends CommandBase {
-  /**
-   * Creates a new Cmd_RunHood.
-   */
-  private final Sub_Shooter s_shoot;
-  double _speed;
-  public Cmd_RunHood(Sub_Shooter shoot, double speed) {
-    _speed = speed;
-    withTimeout(1);
-    // Use addRequirements() here to declare subsystem dependencies.
-    s_shoot = shoot;
-    addRequirements(shoot);
+public class Cmd_HoodGoToSBTicks extends CommandBase {
+  private final Sub_Shooter s_shooter;
+
+  double ticksToGo;
+
+  public Cmd_HoodGoToSBTicks(Sub_Shooter shooter) {
+    s_shooter = shooter;
+    addRequirements(shooter);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    s_shoot.spinHoodMotor(_speed);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
+    s_shooter.hoodGoToPos(s_shooter.getSBHoodTicks());
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    s_shoot.spinHoodMotor(0);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+
+    double absPos = Math.abs(s_shooter.hoodPos());
+    double absSetPoint = Math.abs(ticksToGo);
+
+    return ((absPos - absSetPoint) <= 1);
   }
 }

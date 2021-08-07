@@ -5,24 +5,23 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.state;
+package frc.robot.commands.intake;
 
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import frc.robot.subsystems.Sub_Intake;
 
-public class Sub_StateManager extends SubsystemBase {
+public class CmdI_IntakeStart extends InstantCommand {
 
-  private String robotSubsystemState;
+  private final Sub_Intake s_intake;
 
-  public Sub_StateManager() {
-    robotSubsystemState = "";
+  public CmdI_IntakeStart(Sub_Intake intake) {
+    s_intake = intake;
+    addRequirements(intake);
   }
 
-  public String getRobotState() {
-    return robotSubsystemState;
+  @Override
+  public void initialize() {
+    s_intake.extendCylinder();
+    s_intake.spinIntakeMotor(1);
   }
-
-  public void setRobotSubsystemState(String robotSubsystemState) {
-    this.robotSubsystemState = robotSubsystemState;
-  }
-  
 }

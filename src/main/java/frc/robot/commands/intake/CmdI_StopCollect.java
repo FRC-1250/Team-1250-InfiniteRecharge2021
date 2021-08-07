@@ -11,18 +11,19 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.subsystems.Sub_Intake;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
+// information, see:
 // https://docs.wpilib.org/en/latest/docs/software/commandbased/convenience-features.html
-public class CmdI_Collect extends InstantCommand {
+public class CmdI_StopCollect extends InstantCommand {
   private final Sub_Intake s_intake;
-  public CmdI_Collect(Sub_Intake intake) {
+  public CmdI_StopCollect(Sub_Intake intake) {
     s_intake = intake;
     addRequirements(intake);
-    }
+  }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    s_intake.spinIntakeMotor(0.8);
-    s_intake.extendCylinder();
+    s_intake.spinIntakeMotor(0);
+    s_intake.retractCylinder();
   }
 }

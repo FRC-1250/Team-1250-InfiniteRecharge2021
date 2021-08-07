@@ -15,6 +15,7 @@ import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.Joystick;
+import edu.wpi.first.wpilibj.shuffleboard.BuiltInWidgets;
 import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -38,25 +39,16 @@ public class Sub_Hopper extends SubsystemBase implements CAN_Input {
 
   // Shuffleboard
   ShuffleboardTab hopperTab = Shuffleboard.getTab("Hopper");
-  NetworkTableEntry lRPM = hopperTab.add("L RPM", 0)
-    .withPosition(0, 0)
-    .getEntry();
-  NetworkTableEntry rRPM = hopperTab.add("R RPM", 0)
-    .withPosition(2, 0)
-    .getEntry();
-  NetworkTableEntry lCurrentDraw = hopperTab.add("L Current Draw", 0)
-    .withPosition(0, 1)
-    .getEntry();
-  NetworkTableEntry rCurrentDraw = hopperTab.add("R Current Draw", 0)
-    .withPosition(2, 1)
-    .getEntry();
   NetworkTableEntry sensorValue = hopperTab.add("Sensor Value", 0)
     .withPosition(4, 0)
     .getEntry();
-  NetworkTableEntry uptakeAmps = hopperTab.add("Uptake Amps", 0)
-    .withPosition(5, 0)
-    .getEntry();
-
+  NetworkTableEntry uptakeVolts = hopperTab.add("Uptake Volts", 0)
+    .withWidget(BuiltInWidgets.kGraph)
+    .withPosition(0, 1).getEntry();
+  NetworkTableEntry uptakeAmps = hopperTab.add("Uptake Current", 0)
+    .withWidget(BuiltInWidgets.kGraph)
+    .withPosition(0, 1).getEntry();
+  
   public ShuffleboardTab getTab() { return hopperTab; }
   //
 
@@ -67,26 +59,18 @@ public class Sub_Hopper extends SubsystemBase implements CAN_Input {
   }
 
   public void setShuffleboard() {
-    lRPM.setDouble(getVelocity(leftMotor));
-    rRPM.setDouble(getVelocity(rightMotor));
-    lCurrentDraw.setDouble(leftMotor.getSupplyCurrent());
-    rCurrentDraw.setDouble(rightMotor.getSupplyCurrent());
     sensorValue.setDouble(uptakeSensor.getValue());
-    uptakeAmps.setDouble(getUptakeAmps());
+    uptakeVolts.setDouble(uptakeMotor.getMotorOutputVoltage());
+    uptakeAmps.setDouble(uptakeMotor.getOutputCurrent());
   }
 
   public void spinHopperMotors(double speed) {
     leftMotor.set(speed);
-    rightMotor.set(speed * 0.5);
+    rightMotor.set(speed * 0.75);
   }
 
   public void spinUptakeMotor(double speed) {
     uptakeMotor.set(speed);
-  }
-
-  public void alwaysSpinHopper() {
-    leftMotor.set(0.1);
-    rightMotor.set(0.1);
   }
 
   public double getVelocity(WPI_TalonFX motor){
@@ -100,45 +84,9 @@ public class Sub_Hopper extends SubsystemBase implements CAN_Input {
     return false;
   }
 
-  public double getUptakeAmps() {
-    return uptakeMotor.getSupplyCurrent();
-  }
-
   @Override
   public void periodic() {
-    String mode = RobotContainer.s_stateManager.getRobotState();
-
     setShuffleboard();
-    // if (mode == "SHOOT_MODE" && Gamepad.getRawButton(Constants.LT) && (RobotContainer.s_shooter.getFlyWheelSpeed() > 1)) {
-    //   spinHopperMotors(1);
-    //   spinUptakeMotor(1);
-    // } else {
-
-    //   if (!Gamepad1.getRawButton(Constants.UNJAM_MODE)) {
-    //     if (!getSensor()) {
-    //       spinUptakeMotor(0.4);
-    //       spinHopperMotors(0.4);
-    //     } else {
-    //       spinUptakeMotor(0);
-    //       spinHopperMotors(0.4);
-    //     }
-    //   } 
-    //   else if(!Gamepad1.getRawButton(4)){
-    //     if (!getSensor()) {
-    //       spinUptakeMotor(0.4);
-    //       spinHopperMotors(-0.4);
-    //     } else {
-    //       spinUptakeMotor(0);
-    //       spinHopperMotors(-0.4);
-    //     }
-    //   }
-    //   else {
-    //     leftMotor.set(0.1);
-    //     rightMotor.set(0.1);
-    //     spinUptakeMotor(0);
-    //   }
-
-    // }
   }
 
   public Vector<CAN_DeviceFaults> input() {
