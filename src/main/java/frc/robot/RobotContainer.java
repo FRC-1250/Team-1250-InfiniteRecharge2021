@@ -18,6 +18,7 @@ import frc.robot.commands.hopper.Cmd_UnjamHopper;
 import frc.robot.commands.intake.CmdI_IntakeStart;
 import frc.robot.commands.intake.CmdI_IntakeStop;
 import frc.robot.commands.shared.Cmd_Shoot;
+import frc.robot.commands.shared.Cmd_ShootAtTicks;
 import frc.robot.commands.shared.Cmd_ShootAutoZone;
 import frc.robot.commands.shooter.Cmd_HoodGoToSBTicks;
 import frc.robot.commands.shooter.Cmd_HoodMove;
@@ -50,31 +51,31 @@ public class RobotContainer {
   public static final Sub_Hopper s_hopper = new Sub_Hopper();
   public static final Sub_Recorder s_recorder = new Sub_Recorder();
 
-   // Driver joystick and buttons for logitech gamepad.
-   Joystick driver = new Joystick(0);
-   JoystickButton driverXButton = new JoystickButton(driver, Constants.X_BUTTON);
-   JoystickButton driverYButton = new JoystickButton(driver, Constants.Y_BUTTON);
-   JoystickButton driverAButton = new JoystickButton(driver, Constants.A_BUTTON);
-   JoystickButton driverBButton = new JoystickButton(driver, Constants.B_BUTTON);
-   JoystickButton driverBackButton = new JoystickButton(driver, Constants.BACK_BUTTON);
-   JoystickButton driverStartButton = new JoystickButton(driver, Constants.START_BUTTON);
-   JoystickButton driverLeftBumper = new JoystickButton(driver, Constants.LEFT_BUMPER);
-   JoystickButton driverRightBumper = new JoystickButton(driver, Constants.RIGHT_BUMPER);
-   JoystickButton driverLeftTrigger = new JoystickButton(driver, Constants.LEFT_TRIGEER);
-   JoystickButton driverRightTrigger = new JoystickButton(driver, Constants.RIGHT_TRIGGER);
-   JoystickButton driverLeftStickClick = new JoystickButton(driver, Constants.LEFT_STICK_CLICK);
-   JoystickButton driverRightStickClick = new JoystickButton(driver, Constants.RIGHT_STICK_CLICK);
- 
-   // Operator joystick and buttons
-   Joystick operator = new Joystick(1);
-   JoystickButton operatorClimbButton = new JoystickButton(operator, Constants.CLIMB_MODE);
-   JoystickButton operatorShootButton = new JoystickButton(operator, Constants.SHOOT_MODE);
-   JoystickButton operatorPanelButton = new JoystickButton(operator, Constants.PANEL_MODE);
-   JoystickButton operatorUnjamButton = new JoystickButton(operator, Constants.UNJAM_MODE);
-   JoystickButton operatorXButton = new JoystickButton(operator, Constants.X_BUTTON);
-   JoystickButton operatorYButton = new JoystickButton(operator, Constants.Y_BUTTON);
-   JoystickButton operatorAButton = new JoystickButton(operator, Constants.A_BUTTON);
-   JoystickButton operatorBButton = new JoystickButton(operator, Constants.B_BUTTON);
+  // Driver joystick and buttons for logitech gamepad.
+  Joystick driver = new Joystick(0);
+  JoystickButton driverXButton = new JoystickButton(driver, Constants.X_BUTTON);
+  JoystickButton driverYButton = new JoystickButton(driver, Constants.Y_BUTTON);
+  JoystickButton driverAButton = new JoystickButton(driver, Constants.A_BUTTON);
+  JoystickButton driverBButton = new JoystickButton(driver, Constants.B_BUTTON);
+  JoystickButton driverBackButton = new JoystickButton(driver, Constants.BACK_BUTTON);
+  JoystickButton driverStartButton = new JoystickButton(driver, Constants.START_BUTTON);
+  JoystickButton driverLeftBumper = new JoystickButton(driver, Constants.LEFT_BUMPER);
+  JoystickButton driverRightBumper = new JoystickButton(driver, Constants.RIGHT_BUMPER);
+  JoystickButton driverLeftTrigger = new JoystickButton(driver, Constants.LEFT_TRIGEER);
+  JoystickButton driverRightTrigger = new JoystickButton(driver, Constants.RIGHT_TRIGGER);
+  JoystickButton driverLeftStickClick = new JoystickButton(driver, Constants.LEFT_STICK_CLICK);
+  JoystickButton driverRightStickClick = new JoystickButton(driver, Constants.RIGHT_STICK_CLICK);
+
+  // Operator joystick and buttons
+  Joystick operator = new Joystick(1);
+  JoystickButton operatorClimbButton = new JoystickButton(operator, Constants.CLIMB_MODE);
+  JoystickButton operatorShootButton = new JoystickButton(operator, Constants.SHOOT_MODE);
+  JoystickButton operatorPanelButton = new JoystickButton(operator, Constants.PANEL_MODE);
+  JoystickButton operatorUnjamButton = new JoystickButton(operator, Constants.UNJAM_MODE);
+  JoystickButton operatorXButton = new JoystickButton(operator, Constants.X_BUTTON);
+  JoystickButton operatorYButton = new JoystickButton(operator, Constants.Y_BUTTON);
+  JoystickButton operatorAButton = new JoystickButton(operator, Constants.A_BUTTON);
+  JoystickButton operatorBButton = new JoystickButton(operator, Constants.B_BUTTON);
 
   // Co-op triggers
   // Driver action button -> Right bumper
@@ -116,11 +117,13 @@ public class RobotContainer {
 
     ShuffleboardTab recorderTab = Shuffleboard.getTab("Recorder");
     s_recorder.addFileChooserOptions();
-    recorderTab.add("Start record", new Cmd_StartAutoRecord(s_recorder, s_drivetrain)).withPosition(2, 0).withSize(2, 1);
-    recorderTab.add("Playback record", new Cmd_PlayAutoRecord(s_recorder, s_drivetrain)).withPosition(2, 1).withSize(2, 1);
+    recorderTab.add("Start record", new Cmd_StartAutoRecord(s_recorder, s_drivetrain)).withPosition(2, 0).withSize(2,
+        1);
+    recorderTab.add("Playback record", new Cmd_PlayAutoRecord(s_recorder, s_drivetrain)).withPosition(2, 1).withSize(2,
+        1);
   }
 
-   /**
+  /**
    * Use this method to define your button->command mappings.
    * 
    * @param coopMode true = co-op mode, false = single mode
@@ -133,22 +136,23 @@ public class RobotContainer {
     } else {
       driverRightTrigger.whileActiveOnce(new Cmd_Shoot(s_hopper, s_shooter));
       driverRightBumper.whileActiveOnce(new Cmd_ShootAutoZone(s_hopper, s_shooter));
+      driverBButton.whileActiveOnce(new Cmd_ShootAtTicks(s_hopper, s_shooter, s_intake, 1000L, -53));
       // driverXButton.toggleWhenActive(new Cmd_StartAutoRecord(s_recorder, s_drivetrain));
       // driverBButton.whenActive(new Cmd_PlayAutoRecord(s_recorder, s_drivetrain));
       driverLeftBumper.whenActive(new CmdI_IntakeStart(s_intake));
       driverLeftTrigger.whenActive(new CmdI_IntakeStop(s_intake));
       // driverAButton.whenHeld(new Cmd_HoodMove(s_shooter, driver));
       // driverYButton.whenHeld(new Cmd_HoodMoveDown(s_shooter, driver));
-      driverBackButton.whenHeld(new Cmd_UnjamHopper(s_hopper, s_intake));
+      driverBackButton.whenActive(new Cmd_UnjamHopper(s_hopper, s_intake));
       driverStartButton.whenHeld(new Cmd_HoodGoToSBTicks(s_shooter));
-      operatorAButton.whenHeld(new Cmd_HoodMove(s_shooter, driver));
-      operatorYButton.whenHeld(new Cmd_HoodMoveDown(s_shooter, driver));
+      driverYButton.whenHeld(new Cmd_HoodMove(s_shooter, driver));
+      driverAButton.whenHeld(new Cmd_HoodMoveDown(s_shooter, driver));
     }
   }
 
   /*
-   * This will not work for normal buttons!
-   * Operator buttons default to true -> Active
+   * This will not work for normal buttons! Operator buttons default to true ->
+   * Active
    */
 
   private boolean operatorShootModeActive() {

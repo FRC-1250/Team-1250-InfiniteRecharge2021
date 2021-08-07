@@ -28,6 +28,7 @@ public class Cmd_UnjamHopper extends CommandBase {
     s_hopper.spinHopperMotors(-0.2);
     s_hopper.spinUptakeMotor(-0.4);
     s_intake.extendCylinder();
+    s_intake.spinIntakeMotor(-0.5);
   }
 
   @Override
