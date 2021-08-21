@@ -27,6 +27,8 @@ public final class Constants {
     public static final int DRV_LEFT_FRONT = 12;
     public static final int DRV_LEFT_BACK = 13;
     public static final int DRV_PIGEON = 50;
+
+    // Includes push downs
     public static final int CLM_SOL_PTO = 2;
 
     //Sub_Shooter
@@ -51,8 +53,8 @@ public final class Constants {
     public static final int HOP_ELE_SENS = 0;
 
     //Sub_Climber
-    public static final int CLM_SOL_EXTEND0 = 0;
-    public static final int CLM_SOL_EXTEND1 = 1;
+    public static final int CLM_SOL_TOP = 0;
+    public static final int CLM_SOL_BOTTOM = 1;
     
     //Constants--------------------------------------------
 

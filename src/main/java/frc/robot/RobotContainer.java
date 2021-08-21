@@ -12,7 +12,14 @@ import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.shuffleboard.ShuffleboardTab;
 import frc.robot.commands.auto_actions.Cmd_PlayAutoRecord;
 import frc.robot.commands.auto_actions.Cmd_StartAutoRecord;
-import frc.robot.commands.hopper.Cmd_HopManageNoQueue;
+import frc.robot.commands.climb.CmdG_ExecuteClimb;
+import frc.robot.commands.climb.CmdG_PrepareClimb;
+import frc.robot.commands.climb.CmdI_DisengagePTO;
+import frc.robot.commands.climb.CmdI_EngagePTO;
+import frc.robot.commands.climb.CmdI_ExtendBottomCylinder;
+import frc.robot.commands.climb.CmdI_ExtendTopCylinder;
+import frc.robot.commands.climb.CmdI_RetractBottomCylinder;
+import frc.robot.commands.climb.CmdI_RetractTopCylinder;
 import frc.robot.commands.hopper.Cmd_HopperManagement;
 import frc.robot.commands.hopper.Cmd_UnjamHopper;
 import frc.robot.commands.intake.CmdI_IntakeStart;
@@ -77,6 +84,21 @@ public class RobotContainer {
   JoystickButton operatorAButton = new JoystickButton(operator, Constants.A_BUTTON);
   JoystickButton operatorBButton = new JoystickButton(operator, Constants.B_BUTTON);
 
+  // Development stick
+  Joystick dev = new Joystick(5);
+  JoystickButton devXButton = new JoystickButton(dev, Constants.X_BUTTON);
+  JoystickButton devYButton = new JoystickButton(dev, Constants.Y_BUTTON);
+  JoystickButton devAButton = new JoystickButton(dev, Constants.A_BUTTON);
+  JoystickButton devBButton = new JoystickButton(dev, Constants.B_BUTTON);
+  JoystickButton devBackButton = new JoystickButton(dev, Constants.BACK_BUTTON);
+  JoystickButton devStartButton = new JoystickButton(dev, Constants.START_BUTTON);
+  JoystickButton devLeftBumper = new JoystickButton(dev, Constants.LEFT_BUMPER);
+  JoystickButton devRightBumper = new JoystickButton(dev, Constants.RIGHT_BUMPER);
+  JoystickButton devLeftTrigger = new JoystickButton(dev, Constants.LEFT_TRIGEER);
+  JoystickButton devRightTrigger = new JoystickButton(dev, Constants.RIGHT_TRIGGER);
+  JoystickButton devLeftStickClick = new JoystickButton(dev, Constants.LEFT_STICK_CLICK);
+  JoystickButton devRightStickClick = new JoystickButton(dev, Constants.RIGHT_STICK_CLICK);
+
   // Co-op triggers
   // Driver action button -> Right bumper
   Trigger shootModeAndDriverActionButton = new Trigger() {
@@ -137,7 +159,8 @@ public class RobotContainer {
       driverRightTrigger.whileActiveOnce(new Cmd_Shoot(s_hopper, s_shooter));
       driverRightBumper.whileActiveOnce(new Cmd_ShootAutoZone(s_hopper, s_shooter));
       driverBButton.whileActiveOnce(new Cmd_ShootAtTicks(s_hopper, s_shooter, s_intake, 1000L, -53));
-      // driverXButton.toggleWhenActive(new Cmd_StartAutoRecord(s_recorder, s_drivetrain));
+      // driverXButton.toggleWhenActive(new Cmd_StartAutoRecord(s_recorder,
+      // s_drivetrain));
       // driverBButton.whenActive(new Cmd_PlayAutoRecord(s_recorder, s_drivetrain));
       driverLeftBumper.whenActive(new CmdI_IntakeStart(s_intake));
       driverLeftTrigger.whenActive(new CmdI_IntakeStop(s_intake));
@@ -147,6 +170,13 @@ public class RobotContainer {
       driverStartButton.whenHeld(new Cmd_HoodGoToSBTicks(s_shooter));
       driverYButton.whenHeld(new Cmd_HoodMove(s_shooter, driver));
       driverAButton.whenHeld(new Cmd_HoodMoveDown(s_shooter, driver));
+
+      devLeftBumper.whenActive(new CmdI_RetractTopCylinder(s_climb));
+      devLeftTrigger.whenActive(new CmdI_RetractBottomCylinder(s_climb));
+      devRightBumper.whenActive(new CmdG_PrepareClimb(s_drivetrain, s_climb));
+      devRightTrigger.whenActive(new CmdG_ExecuteClimb(s_drivetrain, s_climb));
+      //devYButton.whenActive(new CmdI_EngagePTO(s_drivetrain));
+      devBButton.whenActive(new CmdI_DisengagePTO(s_drivetrain));
     }
   }
 

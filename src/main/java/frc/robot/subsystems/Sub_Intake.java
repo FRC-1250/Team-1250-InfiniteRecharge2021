@@ -27,8 +27,6 @@ public class Sub_Intake extends SubsystemBase implements CAN_Input {
    */
   WPI_TalonFX intakeMotor = new WPI_TalonFX(Constants.INT_COL_MOTOR);
   Solenoid intakeSol = new Solenoid(Constants.INT_COL_SOL);
-  Joystick Gamepad0 = new Joystick(0);
-  Joystick Gamepad1 = new Joystick(1);
 
   // Shuffleboard
   ShuffleboardTab intakeTab = Shuffleboard.getTab("Intake");
